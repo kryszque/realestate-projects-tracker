@@ -29,8 +29,13 @@ public class ProjectController {
     }
 
     @PostMapping
-    public Project createProject(@RequestBody Project project) {
-        return projectService.createProject(project);
+    public ResponseEntity<Project> createProject(@RequestBody Project project) {
+        try{
+            Project createdProject = projectService.createProject(project);
+            return  ResponseEntity.ok(createdProject);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @GetMapping("/{id}")
@@ -54,7 +59,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}/finish")
-    public ResponseEntity<Project> finishProject(@PathVariable Long id, @RequestBody Project projectData) {
+    public ResponseEntity<Project> finishProject(@PathVariable Long id) {
         try{
             Project finishedProject = projectService.finishProject(id);
             return ResponseEntity.ok(finishedProject);
@@ -64,7 +69,7 @@ public class ProjectController {
     }
 
     @PutMapping("/{id}/archive")
-    public ResponseEntity<Project> archiveProject(@PathVariable Long id, @RequestBody Project projectData) {
+    public ResponseEntity<Project> archiveProject(@PathVariable Long id) {
         try{
             Project archivedProject = projectService.archiveProject(id);
             return ResponseEntity.ok(archivedProject);

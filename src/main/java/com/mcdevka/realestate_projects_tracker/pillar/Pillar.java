@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.pillar;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.mcdevka.realestate_projects_tracker.project.Project;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -16,6 +17,7 @@ public class Pillar {
     private String state;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")
+    @JsonBackReference
     private Project project;
 
     @Override

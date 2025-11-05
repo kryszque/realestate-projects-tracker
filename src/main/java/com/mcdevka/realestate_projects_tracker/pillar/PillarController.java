@@ -1,8 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.pillar;
 
 
-import com.mcdevka.realestate_projects_tracker.project.Project;
-import com.mcdevka.realestate_projects_tracker.project.ProjectService;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -13,11 +12,10 @@ import java.util.List;
 @RequestMapping("api/projects/{projectId}/pillars")
 public class PillarController {
     private final PillarService pillarService;
-    private final ProjectService projectService;
 
-    public PillarController(PillarService pillarService, ProjectService projectService) {
+    @Autowired
+    public PillarController(PillarService pillarService) {
         this.pillarService = pillarService;
-        this.projectService = projectService;
     }
 
     @GetMapping
@@ -31,8 +29,13 @@ public class PillarController {
     }
 
     @PostMapping
-    public Pillar createPillarForAProject(@PathVariable Long projectId, @RequestBody Pillar pillar) {
-        return pillarService.createPillar(projectId, pillar);
+    public ResponseEntity<Pillar> createPillarForAProject(@PathVariable Long projectId, @RequestBody Pillar pillar) {
+        try{
+            Pillar createdPillar = pillarService.createPillar(projectId, pillar);
+            return  ResponseEntity.ok(createdPillar);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).build();
+        }
     }
 
     @PutMapping("/{pillarId}")

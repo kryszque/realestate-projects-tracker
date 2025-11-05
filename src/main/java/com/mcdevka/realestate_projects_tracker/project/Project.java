@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.project;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.pillar.PillarService;
 import jakarta.persistence.*;
@@ -35,6 +36,7 @@ public class Project {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @JsonManagedReference
     private List<Pillar> pillars;
 
     @Override
