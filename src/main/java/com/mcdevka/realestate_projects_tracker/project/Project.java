@@ -2,17 +2,16 @@ package com.mcdevka.realestate_projects_tracker.project;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
-import com.mcdevka.realestate_projects_tracker.pillar.PillarService;
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.*;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
-@Data
+@Getter
+@Setter
+@ToString(exclude = {"pillars"})
+@EqualsAndHashCode(of = {"id"})
 @Entity
 public class Project {
     @Id
@@ -39,19 +38,4 @@ public class Project {
     @JsonManagedReference
     private List<Pillar> pillars;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Project project = (Project) o;
-        return name.equals(project.name) && place.equals(project.place) &&
-                partiesInvolved.equals(project.partiesInvolved) && startDate.equals(project.startDate)
-                && state.equals(project.state) && pillars.equals(project.pillars);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name, place, partiesInvolved, startDate, state, pillars);
-        //TODO should i use id in hash func?
-    }
 }

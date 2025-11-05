@@ -1,12 +1,18 @@
 package com.mcdevka.realestate_projects_tracker.pillar;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.mcdevka.realestate_projects_tracker.item.Item;
 import com.mcdevka.realestate_projects_tracker.project.Project;
 import jakarta.persistence.*;
-import lombok.Data;
-import java.util.Objects;
+import lombok.*;
 
-@Data
+import java.util.List;
+
+@Getter
+@Setter
+@ToString(exclude = {"project", "items"})
+@EqualsAndHashCode(of = {"id"})
 @Entity
 public class Pillar {
 
@@ -19,17 +25,12 @@ public class Pillar {
     @JoinColumn(name = "project_id")
     @JsonBackReference
     private Project project;
+    @OneToMany(
+            mappedBy = "pillar",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonManagedReference
+    List<Item> items;
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Pillar pillar = (Pillar) o;
-        return name.equals(pillar.name) &&  state.equals(pillar.state);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(name, state);
-    }
 }
