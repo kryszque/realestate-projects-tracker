@@ -21,6 +21,7 @@ public class ProjectService {
         this.projectRepository = projectRepository;
         this.pillarService = pillarService;
         this.tagRepository = tagRepository;
+
     }
 
     public List<Project> getAllProjects(){
@@ -91,4 +92,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    public boolean compareInfo(Project p, Object o){
+        throw new IllegalArgumentException("not implemented yet");
+    }
 }

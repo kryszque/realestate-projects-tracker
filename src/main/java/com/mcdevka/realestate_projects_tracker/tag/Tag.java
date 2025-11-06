@@ -1,15 +1,20 @@
 package com.mcdevka.realestate_projects_tracker.tag;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.mcdevka.realestate_projects_tracker.project.Project;
 import jakarta.persistence.*;
-import lombok.Data;
+import lombok.*;
 
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
-@Data
+@Getter
+@Setter
+@NoArgsConstructor
+@ToString(exclude = {"projects"})
+@EqualsAndHashCode(of = {"id"})
 @Entity
 public class Tag {
     @Id
@@ -22,20 +27,7 @@ public class Tag {
     private String state = "active";
 
     @ManyToMany(mappedBy = "tags")
-    @JsonBackReference
+    @JsonIgnore
     private Set<Project> projects = new HashSet<>();
 
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (!(o instanceof Tag)) return false;
-
-        Tag tag = (Tag) o;
-        return Objects.equals(id, tag.id) && Objects.equals(name, tag.name);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(id, name);
-    }
 }

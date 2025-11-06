@@ -91,4 +91,8 @@ public class PillarService {
         }
         return pillar;
     }
+
+    public boolean compareInfo(Pillar p, Object o){
+        throw new IllegalArgumentException("not implemented yet");
+    }
 }
