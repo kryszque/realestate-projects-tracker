@@ -59,16 +59,28 @@ public class PillarService {
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
+        String inputName = inputPillar.getName();
+
+        if(pillarRepository.existsByNameAndStatusAndProjectId(inputName, "active",  projectId)){
+            throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists in " +
+                                                "this project!");
+        }
         Pillar newPillar = new  Pillar();
         newPillar.setProject(project);
-        newPillar.setName(inputPillar.getName());
+        newPillar.setName(inputName);
         newPillar.setState("active");
+
         return pillarRepository.save(newPillar);
     }
 
     public Pillar updatePillarInfo(Long projectId, Long pillarId, Pillar inputPillar){
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
-        updatedPillar.setName(inputPillar.getName());
+        String inputName = inputPillar.getName();
+        if(pillarRepository.existsByNameAndStatusAndProjectId(inputName, "active",  projectId)){
+            throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
+                    "in this project!");
+        }
+        updatedPillar.setName(inputName);
         return pillarRepository.save(updatedPillar);
     }
 
@@ -91,9 +103,5 @@ public class PillarService {
                     pillarId + " doesn't belong to project id: " + projectId);
         }
         return pillar;
-    }
-
-    public boolean compareInfo(Pillar p, Object o){
-        throw new IllegalArgumentException("not implemented yet");
     }
 }
