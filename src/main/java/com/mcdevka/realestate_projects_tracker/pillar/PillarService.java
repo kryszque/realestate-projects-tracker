@@ -15,7 +15,6 @@ public class PillarService {
     private final PillarRepository pillarRepository;
     private final ProjectRepository projectRepository;
 
-    @Autowired
     public PillarService(PillarRepository pillarRepository, ProjectRepository projectRepository) {
         this.pillarRepository = pillarRepository;
         this.projectRepository = projectRepository;

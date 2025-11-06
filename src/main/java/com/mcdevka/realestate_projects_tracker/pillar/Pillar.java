@@ -26,11 +26,10 @@ public class Pillar {
     @JsonBackReference
     private Project project;
     @OneToMany(
-            mappedBy = "pillar",
+           mappedBy = "pillar",
             cascade = CascadeType.ALL,
-            orphanRemoval = true
+             orphanRemoval = true
     )
     @JsonManagedReference
     List<Item> items;
-
 }
