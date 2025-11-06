@@ -5,6 +5,7 @@ import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
 import jakarta.persistence.*;
 import lombok.Data;
 import org.springframework.beans.factory.annotation.Autowired;
+import lombok.NoArgsConstructor;
 import com.mcdevka.realestate_projects_tracker.tag.Tag;
 import lombok.*;
 
@@ -15,7 +16,8 @@ import java.util.List;
 
 @Getter
 @Setter
-@ToString(exclude = {"pillars"})
+@NoArgsConstructor
+@ToString(exclude = {"pillars", "tags"})
 @EqualsAndHashCode(of = {"id"})
 @Entity
 public class Project {
@@ -38,7 +40,6 @@ public class Project {
             joinColumns = @JoinColumn(name = "project_id"), // Kolumna wskazująca na Project
             inverseJoinColumns = @JoinColumn(name = "tag_id") // Kolumna wskazująca na Tag
     )
-    @JsonManagedReference
     private Set<Tag> tags = new HashSet<>();
     // spolka (dostępność)
     // pomysl tylko nazwa projekt wymagania

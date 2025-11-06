@@ -77,7 +77,7 @@ public class ProjectController {
         }
     }
 
-    @PostMapping("/{id}/tags/{tagId}")
+    @PostMapping("/{projectId}/tags/{tagId}")
     public ResponseEntity<Project> addTagToProject(@PathVariable Long projectId,
                                                    @PathVariable Long tagId) {
         try {
@@ -88,7 +88,7 @@ public class ProjectController {
         }
     }
 
-    @DeleteMapping("/{id}/tags/{tagId}")
+    @DeleteMapping("/{projectId}/tags/{tagId}")
     public ResponseEntity<Project> removeTagFromProject(@PathVariable Long projectId,
                                                         @PathVariable Long tagId) {
         try {

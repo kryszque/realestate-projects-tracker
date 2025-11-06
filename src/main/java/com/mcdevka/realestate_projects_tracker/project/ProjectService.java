@@ -21,6 +21,7 @@ public class ProjectService {
         this.projectRepository = projectRepository;
         this.pillarService = pillarService;
         this.tagRepository = tagRepository;
+
     }
 
     public List<Project> getAllProjects(){
