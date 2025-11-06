@@ -13,7 +13,6 @@ import java.util.List;
 public class PillarController {
     private final PillarService pillarService;
 
-    @Autowired
     public PillarController(PillarService pillarService) {
         this.pillarService = pillarService;
     }

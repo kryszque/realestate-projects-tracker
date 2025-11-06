@@ -12,7 +12,6 @@ public class ProjectController {
 
     private final ProjectService projectService;
 
-    @Autowired
     public ProjectController(ProjectService projectService) {
         this.projectService = projectService;
     }
@@ -74,6 +73,28 @@ public class ProjectController {
             Project archivedProject = projectService.archiveProject(id);
             return ResponseEntity.ok(archivedProject);
         }  catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping("/{id}/tags/{tagId}")
+    public ResponseEntity<Project> addTagToProject(@PathVariable Long projectId,
+                                                   @PathVariable Long tagId) {
+        try {
+            Project updatedProject = projectService.addTagToProject(projectId, tagId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{id}/tags/{tagId}")
+    public ResponseEntity<Project> removeTagFromProject(@PathVariable Long projectId,
+                                                        @PathVariable Long tagId) {
+        try {
+            Project updatedProject = projectService.removeTagFromProject(projectId, tagId);
+            return ResponseEntity.ok(updatedProject);
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
