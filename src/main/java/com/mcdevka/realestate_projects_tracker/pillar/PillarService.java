@@ -60,7 +60,7 @@ public class PillarService {
 
         String inputName = inputPillar.getName();
 
-        if(pillarRepository.existsByNameAndStatusAndProjectId(inputName, "active",  projectId)){
+        if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active",  projectId)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists in " +
                                                 "this project!");
         }
@@ -74,7 +74,7 @@ public class PillarService {
 
     public Pillar updatePillarInfo(Long projectId, Long pillarId, Pillar inputPillar){
         String inputName = inputPillar.getName();
-        if(pillarRepository.existsByNameAndStatusAndProjectId(inputName, "active",  projectId)){
+        if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active",  projectId)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
                     "in this project!");
         }

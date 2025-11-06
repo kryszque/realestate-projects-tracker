@@ -5,5 +5,5 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface PillarRepository extends JpaRepository<Pillar, Long> {
-    boolean existsByNameAndStatusAndProjectId(String name, String status, Long projectId);
+    boolean existsByNameAndStateAndProjectId(String name, String state, Long projectId);
 }

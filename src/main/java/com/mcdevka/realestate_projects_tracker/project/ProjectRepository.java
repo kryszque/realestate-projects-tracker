@@ -7,7 +7,7 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long> {
-    //excluding addDate in checking for identical projects
-    boolean existsByNameAndPlaceAndPartiesInvolvedAndState(String projectName, String place,
-                                                           List<String> parties, String state);
+    //excluding addDate and partiesInvolved (too complicated for JPA to use this simple method in
+    // checking for identical projects)
+    boolean existsByNameAndPlaceAndState(String projectName, String place, String state);
 }

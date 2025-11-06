@@ -39,8 +39,7 @@ public class ProjectService {
         String inputPlace = inputProject.getPlace();
         List<String> inputPartiesInvolved = inputProject.getPartiesInvolved();
 
-        if(projectRepository.existsByNameAndPlaceAndPartiesInvolvedAndState(inputName, inputPlace,
-                                        inputPartiesInvolved, "active")){
+        if(projectRepository.existsByNameAndPlaceAndState(inputName, inputPlace,"active")){
             throw new IllegalArgumentException("Identical project already exists!");
         }
 
@@ -63,8 +62,7 @@ public class ProjectService {
         String inputPlace = updatedProjectData.getPlace();
         List<String> inputPartiesInvolved = updatedProjectData.getPartiesInvolved();
 
-        if(projectRepository.existsByNameAndPlaceAndPartiesInvolvedAndState(inputName, inputPlace,
-                inputPartiesInvolved, "active")){
+        if(projectRepository.existsByNameAndPlaceAndState(inputName, inputPlace,"active")){
             throw new IllegalArgumentException("Identical project already exists!");
         }
 
