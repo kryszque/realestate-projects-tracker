@@ -73,12 +73,12 @@ public class PillarService {
     }
 
     public Pillar updatePillarInfo(Long projectId, Long pillarId, Pillar inputPillar){
-        Pillar updatedPillar = validateProjectId(projectId, pillarId);
         String inputName = inputPillar.getName();
         if(pillarRepository.existsByNameAndStatusAndProjectId(inputName, "active",  projectId)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
                     "in this project!");
         }
+        Pillar updatedPillar = validateProjectId(projectId, pillarId);
         updatedPillar.setName(inputName);
         return pillarRepository.save(updatedPillar);
     }

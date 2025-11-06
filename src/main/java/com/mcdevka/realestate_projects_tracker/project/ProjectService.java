@@ -34,11 +34,20 @@ public class ProjectService {
     }
 
     public Project createProject(Project inputProject){
-        Project createdProject = new Project();
 
-        createdProject.setName(inputProject.getName());
-        createdProject.setPlace(inputProject.getPlace());
-        createdProject.setPartiesInvolved(inputProject.getPartiesInvolved());
+        String inputName = inputProject.getName();
+        String inputPlace = inputProject.getPlace();
+        List<String> inputPartiesInvolved = inputProject.getPartiesInvolved();
+
+        if(projectRepository.existsByNameAndPlaceAndPartiesInvolvedAndState(inputName, inputPlace,
+                                        inputPartiesInvolved, "active")){
+            throw new IllegalArgumentException("Identical project already exists!");
+        }
+
+        Project createdProject = new Project();
+        createdProject.setName(inputName);
+        createdProject.setPlace(inputPlace);
+        createdProject.setPartiesInvolved(inputPartiesInvolved);
 
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
@@ -49,13 +58,21 @@ public class ProjectService {
     }
 
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
+
+        String inputName = updatedProjectData.getName();
+        String inputPlace = updatedProjectData.getPlace();
+        List<String> inputPartiesInvolved = updatedProjectData.getPartiesInvolved();
+
+        if(projectRepository.existsByNameAndPlaceAndPartiesInvolvedAndState(inputName, inputPlace,
+                inputPartiesInvolved, "active")){
+            throw new IllegalArgumentException("Identical project already exists!");
+        }
+
         Project existingProject = getProjectById(id);
 
-        existingProject.setName(updatedProjectData.getName());
-        existingProject.setPlace(updatedProjectData.getPlace());
-        existingProject.setPartiesInvolved(updatedProjectData.getPartiesInvolved());
-        existingProject.setStartDate(updatedProjectData.getStartDate());
-        existingProject.setState(updatedProjectData.getState());
+        existingProject.setName(inputName);
+        existingProject.setPlace(inputPlace);
+        existingProject.setPartiesInvolved(inputPartiesInvolved);
 
         return projectRepository.save(existingProject);
     }
@@ -90,9 +107,5 @@ public class ProjectService {
 
         project.getTags().remove(tag);
         return projectRepository.save(project);
-    }
-
-    public boolean compareInfo(Project p, Object o){
-        throw new IllegalArgumentException("not implemented yet");
     }
 }
