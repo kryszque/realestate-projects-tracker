@@ -3,11 +3,9 @@ package com.mcdevka.realestate_projects_tracker.project;
 import com.mcdevka.realestate_projects_tracker.pillar.PillarService;
 import com.mcdevka.realestate_projects_tracker.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.tag.TagRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
 import java.util.List;
 
 @Service
@@ -35,18 +33,11 @@ public class ProjectService {
 
     public Project createProject(Project inputProject){
 
-        String inputName = inputProject.getName();
-        String inputPlace = inputProject.getPlace();
-        List<String> inputPartiesInvolved = inputProject.getPartiesInvolved();
-
-        if(projectRepository.existsByNameAndPlaceAndState(inputName, inputPlace,"active")){
-            throw new IllegalArgumentException("Identical project already exists!");
-        }
+        checkForProjectDuplicates(inputProject);
 
         Project createdProject = new Project();
-        createdProject.setName(inputName);
-        createdProject.setPlace(inputPlace);
-        createdProject.setPartiesInvolved(inputPartiesInvolved);
+
+        setChangableFields(inputProject, createdProject);
 
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
@@ -58,19 +49,11 @@ public class ProjectService {
 
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
 
-        String inputName = updatedProjectData.getName();
-        String inputPlace = updatedProjectData.getPlace();
-        List<String> inputPartiesInvolved = updatedProjectData.getPartiesInvolved();
-
-        if(projectRepository.existsByNameAndPlaceAndState(inputName, inputPlace,"active")){
-            throw new IllegalArgumentException("Identical project already exists!");
-        }
+        checkForProjectDuplicates(updatedProjectData);
 
         Project existingProject = getProjectById(id);
 
-        existingProject.setName(inputName);
-        existingProject.setPlace(inputPlace);
-        existingProject.setPartiesInvolved(inputPartiesInvolved);
+        setChangableFields(updatedProjectData, existingProject);
 
         return projectRepository.save(existingProject);
     }
@@ -105,5 +88,24 @@ public class ProjectService {
 
         project.getTags().remove(tag);
         return projectRepository.save(project);
+    }
+
+    private void checkForProjectDuplicates(Project inputProject){
+        String inputName = inputProject.getName();
+        String inputPlace = inputProject.getPlace();
+        String inputContractor = inputProject.getContractor();
+        String inputCompanyResposible = inputProject.getCompanyResposible();
+
+        if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposible(inputName,
+                inputPlace,"active", inputContractor,inputCompanyResposible)){
+            throw new IllegalArgumentException("Identical project already exists!");
+        }
+    }
+
+    private void setChangableFields(Project inputProject, Project existingProject){
+        existingProject.setName(inputProject.getName());
+        existingProject.setPlace(inputProject.getPlace());
+        existingProject.setContractor(inputProject.getContractor());
+        existingProject.setCompanyResposible(inputProject.getCompanyResposible());
     }
 }

@@ -3,8 +3,6 @@ package com.mcdevka.realestate_projects_tracker.project;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
 import jakarta.persistence.*;
-import lombok.Data;
-import org.springframework.beans.factory.annotation.Autowired;
 import lombok.NoArgsConstructor;
 import com.mcdevka.realestate_projects_tracker.tag.Tag;
 import lombok.*;
@@ -29,10 +27,9 @@ public class Project {
 
     private String place;
 
-    @ElementCollection
-    @CollectionTable(name = "project_parties", joinColumns = @JoinColumn(name = "project_id"))
-    @Column(name = "party_name")
-    private List<String> partiesInvolved;
+    private String contractor;
+
+    private String companyResposible;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

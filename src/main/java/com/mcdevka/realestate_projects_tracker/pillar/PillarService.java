@@ -3,7 +3,6 @@ package com.mcdevka.realestate_projects_tracker.pillar;
 
 import com.mcdevka.realestate_projects_tracker.project.Project;
 import com.mcdevka.realestate_projects_tracker.project.ProjectRepository;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -73,7 +72,11 @@ public class PillarService {
     }
 
     public Pillar updatePillarInfo(Long projectId, Long pillarId, Pillar inputPillar){
+        projectRepository.findById(projectId)
+                .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
+
         String inputName = inputPillar.getName();
+
         if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active",  projectId)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
                     "in this project!");
