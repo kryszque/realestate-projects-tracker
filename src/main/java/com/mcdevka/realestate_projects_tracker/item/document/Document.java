@@ -1,13 +1,14 @@
 package com.mcdevka.realestate_projects_tracker.item.document;
 
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.item.Item;
-import jakarta.persistence.Column;
-import jakarta.persistence.DiscriminatorValue;
-import jakarta.persistence.Entity;
+import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -24,4 +25,16 @@ public class Document extends Item {
     @Column(nullable = false) // <-- DODANE: To jest ID pliku na Dysku Google
     private String googleFileId;
 
+    @OneToMany(
+            mappedBy = "document",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonManagedReference
+    private List<DocumentHistory> historyEntries = new ArrayList<>();
+
+    @PrePersist
+    protected void onCreate() {
+        this.lastChangeDate = LocalDate.now();
+    }
 }
