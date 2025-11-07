@@ -21,25 +21,36 @@ public class ItemService {
         this.pillarRepository = pillarRepository;
     }
 
-    @Transactional(readOnly = true)
-    public List<Item> getItemsForPillar(Long pillarId) {
-        if (!pillarRepository.existsById(pillarId)) {
-            throw new IllegalArgumentException("Filar o ID " + pillarId + " nie istnieje.");
+    private Pillar validatePillarPath(Long projectId, Long pillarId) {
+        Pillar pillar = pillarRepository.findById(pillarId)
+                .orElseThrow(() -> new IllegalArgumentException("Filar o ID " + pillarId + " nie istnieje."));
+
+        if (!pillar.getProject().getId().equals(projectId)) {
+            throw new IllegalArgumentException("Filar o ID " + pillarId + " nie należy do projektu o ID " + projectId);
         }
+        return pillar;
+    }
+
+    @Transactional(readOnly = true)
+    public List<Item> getItemsForPillar(Long projectId, Long pillarId) {
+        validatePillarPath(projectId, pillarId);
 
         return itemRepository.findByPillarId(pillarId);
     }
 
     @Transactional(readOnly = true)
-    public Item getItemById(Long id) {
-        return itemRepository.findById(id)
+    public Item getItemById(Long projectId, Long pillarId, Long id) {
+        Item item =  itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found!"));
+        if (!item.getPillar().getId().equals(pillarId) || !item.getPillar().getProject().getId().equals(projectId)) {
+            throw new IllegalArgumentException("Item with ID " + id + " is not in pillar/project path");
+        }
+        return item;
     }
 
     @Transactional
-    public Item createItem(Long pillarId, Item item) {
-        Pillar pillar = pillarRepository.findById(pillarId)
-                .orElseThrow(() -> new IllegalArgumentException("Filar o ID " + pillarId + " nie istnieje."));
+    public Item createItem(Long projectId, Long pillarId, Item item) {
+        Pillar pillar = validatePillarPath(projectId, pillarId);
 
         item.setAddDate(LocalDate.now());
         item.setPillar(pillar);
@@ -47,19 +58,18 @@ public class ItemService {
     }
 
     @Transactional
-    public Item updateItem(Long itemId, Item updatedItemData) {
-        Item existingItem = getItemById(itemId);
+    public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItemData) {
+        Item existingItem = getItemById(projectId, pillarId, itemId);
 
         if (!existingItem.getClass().equals(updatedItemData.getClass())) {
-            throw new IllegalArgumentException("Nie można zmienić typu Itema (np. z TextItem na MeetingItem).");
+            throw new IllegalArgumentException("You can't change item type.");
         }
 
         if (existingItem instanceof Task) {
 
         } else if (existingItem instanceof Meeting) {
 
-        } else if (existingItem instanceof Document) {
-            Document existingDoc = (Document) existingItem;
+        } else if (existingItem instanceof Document existingDoc) {
             Document updatedDoc = (Document) updatedItemData;
 
             existingDoc.setDeadline(updatedDoc.getDeadline());
@@ -72,14 +82,16 @@ public class ItemService {
         return itemRepository.save(existingItem);
     }
 
-    public Item archiveItem(Long id){
-        Item archvedItem = getItemById(id);
-        archvedItem.setState("archived");
-        return itemRepository.save(archvedItem);
+    @Transactional
+    public Item archiveItem(Long projectId, Long pillarId, Long id){
+        Item archivedItem = getItemById(projectId, pillarId, id);
+        archivedItem.setState("archived");
+        return itemRepository.save(archivedItem);
     }
 
-    public Item finishItem(Long id){
-        Item finishedItem = getItemById(id);
+    @Transactional
+    public Item finishItem(Long projectId, Long pillarId, Long id){
+        Item finishedItem = getItemById(projectId, pillarId, id);
         finishedItem.setState("finished");
         return itemRepository.save(finishedItem);
     }

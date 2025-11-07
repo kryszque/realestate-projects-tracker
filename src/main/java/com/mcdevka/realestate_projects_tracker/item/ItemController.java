@@ -15,9 +15,9 @@ public class ItemController {
     public ItemController(ItemService itemService) {this.itemService = itemService;}
 
     @GetMapping
-    public ResponseEntity<List<Item>> getItemsForPillar(@PathVariable Long pillarId) {
+    public ResponseEntity<List<Item>> getItemsForPillar(@PathVariable Long projectId, @PathVariable Long pillarId) {
         try {
-            List<Item> items = itemService.getItemsForPillar(pillarId);
+            List<Item> items = itemService.getItemsForPillar(projectId, pillarId);
             return ResponseEntity.ok(items);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -25,12 +25,9 @@ public class ItemController {
     }
 
     @PostMapping
-    public ResponseEntity<Item> createItem(
-            @PathVariable Long pillarId,
-            @RequestBody Item item
-    ) {
+    public ResponseEntity<Item> createItem(@PathVariable Long projectId, @PathVariable Long pillarId, @RequestBody Item item) {
         try {
-            Item createdItem = itemService.createItem(pillarId, item);
+            Item createdItem = itemService.createItem(projectId, pillarId, item);
             return new ResponseEntity<>(createdItem, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
@@ -38,9 +35,9 @@ public class ItemController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<Item> getItemById(@PathVariable Long id) {
+    public ResponseEntity<Item> getItemById(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id) {
         try {
-            Item item = itemService.getItemById(id);
+            Item item = itemService.getItemById(projectId, pillarId, id);
             return ResponseEntity.ok(item);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -48,9 +45,9 @@ public class ItemController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<Item> updateItem(@PathVariable Long id, @RequestBody Item updatedItemData) {
+    public ResponseEntity<Item> updateItem(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @RequestBody Item updatedItemData) {
         try {
-            Item updatedItem = itemService.updateItem(id, updatedItemData);
+            Item updatedItem = itemService.updateItem(projectId, pillarId, id, updatedItemData);
             return ResponseEntity.ok(updatedItem);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -58,9 +55,9 @@ public class ItemController {
     }
 
     @PutMapping("/{id}/archive")
-    public ResponseEntity<Item> archiveItem(@PathVariable Long id) {
+    public ResponseEntity<Item> archiveItem(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id) {
         try{
-            Item archivedItem = itemService.archiveItem(id);
+            Item archivedItem = itemService.archiveItem(projectId, pillarId, id);
             return ResponseEntity.ok(archivedItem);
         }  catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
@@ -68,9 +65,9 @@ public class ItemController {
     }
 
     @PutMapping("/{id}/finish")
-    public ResponseEntity<Item> finishItem(@PathVariable Long id) {
+    public ResponseEntity<Item> finishItem(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id) {
         try{
-            Item finishedItem = itemService.finishItem(id);
+            Item finishedItem = itemService.finishItem(projectId, pillarId, id);
             return ResponseEntity.ok(finishedItem);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
