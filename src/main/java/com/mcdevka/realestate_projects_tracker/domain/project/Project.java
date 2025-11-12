@@ -1,10 +1,10 @@
-package com.mcdevka.realestate_projects_tracker.project;
+package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
-import com.mcdevka.realestate_projects_tracker.tag.Tag;
+import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import lombok.*;
 
 import java.time.LocalDate;

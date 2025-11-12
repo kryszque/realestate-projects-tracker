@@ -1,7 +1,6 @@
-package com.mcdevka.realestate_projects_tracker.pillar;
+package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

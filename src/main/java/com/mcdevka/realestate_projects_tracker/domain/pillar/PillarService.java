@@ -1,8 +1,8 @@
-package com.mcdevka.realestate_projects_tracker.pillar;
+package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 
-import com.mcdevka.realestate_projects_tracker.project.Project;
-import com.mcdevka.realestate_projects_tracker.project.ProjectRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
+import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;

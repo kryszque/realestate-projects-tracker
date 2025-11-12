@@ -1,4 +1,4 @@
-package com.mcdevka.realestate_projects_tracker.pillar;
+package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;

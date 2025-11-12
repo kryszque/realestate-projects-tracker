@@ -1,4 +1,4 @@
-package com.mcdevka.realestate_projects_tracker.item.document;
+package com.mcdevka.realestate_projects_tracker.domain.item.document;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;

@@ -1,13 +1,11 @@
-package com.mcdevka.realestate_projects_tracker.tag;
+package com.mcdevka.realestate_projects_tracker.domain.tag;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.mcdevka.realestate_projects_tracker.project.Project;
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.util.HashSet;
-import java.util.Objects;
 import java.util.Set;
 
 @Getter

@@ -1,6 +1,5 @@
-package com.mcdevka.realestate_projects_tracker.item;
+package com.mcdevka.realestate_projects_tracker.domain.item;
 
-import com.mcdevka.realestate_projects_tracker.project.Project;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

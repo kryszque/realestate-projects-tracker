@@ -1,11 +1,11 @@
-package com.mcdevka.realestate_projects_tracker.item;
+package com.mcdevka.realestate_projects_tracker.domain.item;
 
-import com.mcdevka.realestate_projects_tracker.item.document.Document;
-import com.mcdevka.realestate_projects_tracker.item.document.DocumentHistory;
-import com.mcdevka.realestate_projects_tracker.item.meeting.Meeting;
-import com.mcdevka.realestate_projects_tracker.item.task.Task;
-import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
-import com.mcdevka.realestate_projects_tracker.pillar.PillarRepository;
+import com.mcdevka.realestate_projects_tracker.domain.item.document.Document;
+import com.mcdevka.realestate_projects_tracker.domain.item.document.DocumentHistory;
+import com.mcdevka.realestate_projects_tracker.domain.item.meeting.Meeting;
+import com.mcdevka.realestate_projects_tracker.domain.item.task.Task;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 

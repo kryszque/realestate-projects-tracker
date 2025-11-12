@@ -1,6 +1,6 @@
-package com.mcdevka.realestate_projects_tracker.item.task;
+package com.mcdevka.realestate_projects_tracker.domain.item.task;
 
-import com.mcdevka.realestate_projects_tracker.item.Item;
+import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import jakarta.persistence.DiscriminatorValue;
 import jakarta.persistence.Entity;
 import lombok.Data;

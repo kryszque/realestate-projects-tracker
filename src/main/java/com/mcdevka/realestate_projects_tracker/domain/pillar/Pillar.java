@@ -1,9 +1,9 @@
-package com.mcdevka.realestate_projects_tracker.pillar;
+package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.mcdevka.realestate_projects_tracker.item.Item;
-import com.mcdevka.realestate_projects_tracker.project.Project;
+import com.mcdevka.realestate_projects_tracker.domain.item.Item;
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 

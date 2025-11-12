@@ -1,18 +1,17 @@
-package com.mcdevka.realestate_projects_tracker.item;
+package com.mcdevka.realestate_projects_tracker.domain.item;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonSubTypes;
 import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.mcdevka.realestate_projects_tracker.item.document.Document;
-import com.mcdevka.realestate_projects_tracker.item.meeting.Meeting;
-import com.mcdevka.realestate_projects_tracker.item.task.Task;
-import com.mcdevka.realestate_projects_tracker.pillar.Pillar;
+import com.mcdevka.realestate_projects_tracker.domain.item.document.Document;
+import com.mcdevka.realestate_projects_tracker.domain.item.meeting.Meeting;
+import com.mcdevka.realestate_projects_tracker.domain.item.task.Task;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
-import java.util.Objects;
 
 @Getter
 @Setter

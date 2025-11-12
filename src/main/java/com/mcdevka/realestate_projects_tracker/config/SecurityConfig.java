@@ -1,4 +1,4 @@
-package com.mcdevka.realestate_projects_tracker.security;
+package com.mcdevka.realestate_projects_tracker.config;
 
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;

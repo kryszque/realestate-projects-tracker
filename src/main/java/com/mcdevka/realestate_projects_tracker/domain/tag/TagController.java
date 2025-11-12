@@ -1,4 +1,4 @@
-package com.mcdevka.realestate_projects_tracker.tag;
+package com.mcdevka.realestate_projects_tracker.domain.tag;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

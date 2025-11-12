@@ -1,7 +1,7 @@
-package com.mcdevka.realestate_projects_tracker.item.document;
+package com.mcdevka.realestate_projects_tracker.domain.item.document;
 
 import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.mcdevka.realestate_projects_tracker.item.Item;
+import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;

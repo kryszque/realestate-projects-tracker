@@ -1,6 +1,5 @@
-package com.mcdevka.realestate_projects_tracker.tag;
+package com.mcdevka.realestate_projects_tracker.domain.tag;
 
-import com.mcdevka.realestate_projects_tracker.project.Project;
 import org.springframework.stereotype.Service;
 
 import java.util.List;

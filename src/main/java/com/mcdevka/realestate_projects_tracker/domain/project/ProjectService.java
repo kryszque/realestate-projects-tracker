@@ -1,8 +1,8 @@
-package com.mcdevka.realestate_projects_tracker.project;
+package com.mcdevka.realestate_projects_tracker.domain.project;
 
-import com.mcdevka.realestate_projects_tracker.pillar.PillarService;
-import com.mcdevka.realestate_projects_tracker.tag.Tag;
-import com.mcdevka.realestate_projects_tracker.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
+import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
+import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
