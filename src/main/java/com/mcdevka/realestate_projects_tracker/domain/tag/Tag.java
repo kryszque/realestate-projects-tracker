@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.tag;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
@@ -27,5 +28,9 @@ public class Tag {
     @ManyToMany(mappedBy = "tags")
     @JsonIgnore
     private Set<Project> projects = new HashSet<>();
+
+    @ManyToMany(mappedBy = "tags")
+    @JsonIgnore
+    private Set<Item> items = new HashSet<>();
 
 }

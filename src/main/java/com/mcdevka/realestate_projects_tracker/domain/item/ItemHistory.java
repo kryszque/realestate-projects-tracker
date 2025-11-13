@@ -1,4 +1,4 @@
-package com.mcdevka.realestate_projects_tracker.domain.item.document;
+package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
@@ -12,16 +12,16 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @Entity
-@Table(name = "document_history")
-public class DocumentHistory {
+@Table(name = "item_history")
+public class ItemHistory {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private String name;
+
     @Column(nullable = false)
     private LocalDate changeDate;
-
-    private String oldStatus;
 
     @Column(nullable = false)
     private String newStatus;
@@ -31,13 +31,13 @@ public class DocumentHistory {
     private LocalDate deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "document_id", nullable = false)
+    @JoinColumn(name = "item_id", nullable = false)
     @JsonBackReference
-    private Document document;
+    private Item item;
 
-    public DocumentHistory(Document document, String oldStatus, String newStatus, String description, LocalDate deadline) {
-        this.document = document;
-        this.oldStatus = oldStatus;
+    public ItemHistory(Item item, String name, String newStatus, String description, LocalDate deadline) {
+        this.item = item;
+        this.name = name;
         this.newStatus = newStatus;
         this.description = description;
         this.changeDate = LocalDate.now();

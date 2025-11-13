@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,6 +69,26 @@ public class ItemController {
         try{
             Item finishedItem = itemService.finishItem(projectId, pillarId, id);
             return ResponseEntity.ok(finishedItem);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping("/{id}/tags/{tagId}")
+    public ResponseEntity<Item> addTagToProject(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
+        try {
+            Item updatedItem = itemService.addTagToItem(projectId, pillarId, id, tagId);
+            return ResponseEntity.ok(updatedItem);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{id}/tags/{tagId}")
+    public ResponseEntity<Item> removeTagFromProject(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
+        try {
+            Item updatedItem = itemService.removeTagFromItem(projectId, pillarId, id, tagId);
+            return ResponseEntity.ok(updatedItem);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }

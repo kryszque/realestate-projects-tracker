@@ -2,45 +2,44 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonSubTypes;
-import com.fasterxml.jackson.annotation.JsonTypeInfo;
-import com.mcdevka.realestate_projects_tracker.domain.item.document.Document;
-import com.mcdevka.realestate_projects_tracker.domain.item.meeting.Meeting;
-import com.mcdevka.realestate_projects_tracker.domain.item.task.Task;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
+import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Getter
 @Setter
 @ToString(exclude = {"pillar"})
 @EqualsAndHashCode(of = {"id"})
 @Entity
-@Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "item_type")
 
-// 1. Mówimy Jacksonowi, że ta klasa ma podtypy
-@JsonTypeInfo(
-        use = JsonTypeInfo.Id.NAME,         // Użyj nazw logicznych (np. "textNote")
-        include = JsonTypeInfo.As.PROPERTY, // Spodziewaj się pola w JSON
-        property = "type"                   // To pole będzie nazywać się "type"
-)
-
-@JsonSubTypes({
-        @JsonSubTypes.Type(value = Task.class, name = "textNote"),
-        @JsonSubTypes.Type(value = Document.class, name = "document"),
-        @JsonSubTypes.Type(value = Meeting.class, name = "meeting")
-})
-
-public abstract class Item {
+public class Item {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @Column(nullable = false)
     private String name;
     private String state = "active";
+    private String status;
+
+    @Column(nullable = false, updatable = false)
     private LocalDate addDate;
+    private LocalDate lastChangeDate;
+    private LocalDate deadline;
+
+    @Column(nullable = false)
+    private String webViewLink; // <-- ZMIANA: Bardziej precyzyjny (to jest link do podglądu)
+
+    @Column(nullable = false) // <-- DODANE: To jest ID pliku na Dysku Google
+    private String googleFileId;
 
     @Lob
     private String description;
@@ -50,12 +49,27 @@ public abstract class Item {
     @JsonBackReference
     private Pillar pillar;
 
-    public boolean equalsInfo(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Item item = (Item) o;
-        return name.equals(item.name) && state.equals(item.state) &&
-                addDate.equals(item.addDate) && description.equals(item.description);
-    }
+    @OneToMany(
+            mappedBy = "item",
+            cascade = CascadeType.ALL,
+            orphanRemoval = true
+    )
+    @JsonManagedReference
+    private List<ItemHistory> historyEntries = new ArrayList<>();
 
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "item_tags",
+            joinColumns = @JoinColumn(name = "item_id"),
+            inverseJoinColumns = @JoinColumn(name = "tag_id")
+    )
+    private Set<Tag> tags = new HashSet<>();
+
+    @PrePersist
+    protected void onCreate() {
+        this.lastChangeDate = LocalDate.now();
+        if (this.addDate == null) {
+            this.addDate = LocalDate.now();
+        }
+    }
 }
