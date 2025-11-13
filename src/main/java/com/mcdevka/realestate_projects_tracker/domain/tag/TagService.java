@@ -21,8 +21,11 @@ public class TagService {
     }
 
     public Tag createTag(Tag inputTag) {
-        Tag createdTag = new Tag();
+        if (tagRepository.existsByName(inputTag.getName())) {
+            throw new IllegalArgumentException("Tag with name " + inputTag.getName() + " already exists!");
+        }
 
+        Tag createdTag = new Tag();
         createdTag.setName(inputTag.getName());
 
         return tagRepository.save(createdTag);

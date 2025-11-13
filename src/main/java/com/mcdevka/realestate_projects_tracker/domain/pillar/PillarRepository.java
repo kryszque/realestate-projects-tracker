@@ -6,4 +6,7 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PillarRepository extends JpaRepository<Pillar, Long> {
     boolean existsByNameAndStateAndProjectId(String name, String state, Long projectId);
+
+    // NOWA METODA: Sprawdza, czy istnieje inny filar o tej nazwie
+    boolean existsByNameAndStateAndProjectIdAndIdNot(String name, String state, Long projectId, Long id);
 }

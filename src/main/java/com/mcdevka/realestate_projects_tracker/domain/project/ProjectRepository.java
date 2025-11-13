@@ -12,4 +12,10 @@ public interface ProjectRepository extends JpaRepository<Project, Long> {
                                                                           String place, String state,
                                                                           String contractor,
                                                                           String companyResposible);
+
+    boolean existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndIdNot(String projectName,
+                                                                                  String place, String state,
+                                                                                  String contractor,
+                                                                                  String companyResposible,
+                                                                                  Long id);
 }

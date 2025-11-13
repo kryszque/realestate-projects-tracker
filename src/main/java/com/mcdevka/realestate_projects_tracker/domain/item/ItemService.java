@@ -54,6 +54,8 @@ public class ItemService {
     public Item createItem(Long projectId, Long pillarId, Item inputItem) {
         Pillar pillar = validatePillarPath(projectId, pillarId);
 
+        checkForItemDuplicates(inputItem.getName(), "active", pillarId);
+
         Item createdItem = new Item();
 
         createdItem.setWebViewLink(inputItem.getWebViewLink());
@@ -71,10 +73,10 @@ public class ItemService {
     public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
 
+        checkForItemDuplicates(updatedItem.getName(), "active", pillarId, itemId);
+
         setChangableFields(updatedItem, existingItem);
         addHistoryEntry(existingItem, existingItem.getName(), existingItem.getStatus(), existingItem.getDescription(), existingItem.getDeadline());
-
-        existingItem.setLastChangeDate(LocalDate.now());
 
         return itemRepository.save(existingItem);
     }
@@ -104,7 +106,6 @@ public class ItemService {
         existingItem.setStatus(inputItem.getStatus());
         existingItem.setDeadline(inputItem.getDeadline());
         existingItem.setDescription(inputItem.getDescription());
-        existingItem.setLastChangeDate(LocalDate.now());
     }
 
     @Transactional
@@ -127,5 +128,17 @@ public class ItemService {
 
         item.getTags().remove(tag);
         return itemRepository.save(item);
+    }
+
+    private void checkForItemDuplicates(String name, String state, Long pillarId) {
+        if (itemRepository.existsByNameAndStateAndPillarId(name, state, pillarId)) {
+            throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
+        }
+    }
+
+    private void checkForItemDuplicates(String name, String state, Long pillarId, Long idToExclude) {
+        if (itemRepository.existsByNameAndStateAndPillarIdAndIdNot(name, state, pillarId, idToExclude)) {
+            throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
+        }
     }
 }

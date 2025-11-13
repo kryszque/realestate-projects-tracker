@@ -72,4 +72,9 @@ public class Item {
             this.addDate = LocalDate.now();
         }
     }
+
+    @PreUpdate
+    protected void onUpdate() {
+        this.lastChangeDate = LocalDate.now();
+    }
 }
