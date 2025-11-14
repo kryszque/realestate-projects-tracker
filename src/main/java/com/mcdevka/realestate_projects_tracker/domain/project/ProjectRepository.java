@@ -1,21 +1,14 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.stereotype.Repository;
 
 
 @Repository
-public interface ProjectRepository extends JpaRepository<Project, Long> {
-    //excluding addDate and partiesInvolved (too complicated for JPA to use this simple method in
-    // checking for identical projects)
+public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
     boolean existsByNameAndPlaceAndStateAndContractorAndCompanyResposible(String projectName,
                                                                           String place, String state,
                                                                           String contractor,
                                                                           String companyResposible);
-
-    boolean existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndIdNot(String projectName,
-                                                                                  String place, String state,
-                                                                                  String contractor,
-                                                                                  String companyResposible,
-                                                                                  Long id);
 }

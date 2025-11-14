@@ -3,6 +3,7 @@ package com.mcdevka.realestate_projects_tracker.domain.project;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -49,7 +50,7 @@ public class ProjectService {
 
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
 
-        checkForProjectDuplicates(updatedProjectData, id);
+        checkForProjectDuplicates(updatedProjectData);
 
         Project existingProject = getProjectById(id);
 
@@ -90,6 +91,11 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    public List<Project> searchProjects(ProjectSearchCriteria criteria) {
+        Specification<Project> spec = ProjectSpecifications.createSearch(criteria);
+        return projectRepository.findAll(spec);
+    }
+
     private void checkForProjectDuplicates(Project inputProject){
         String inputName = inputProject.getName();
         String inputPlace = inputProject.getPlace();
@@ -98,19 +104,6 @@ public class ProjectService {
 
         if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposible(inputName,
                 inputPlace,"active", inputContractor,inputCompanyResposible)){
-            throw new IllegalArgumentException("Identical project already exists!");
-        }
-    }
-
-    private void checkForProjectDuplicates(Project inputProject, Long idToExclude){
-        String inputName = inputProject.getName();
-        String inputPlace = inputProject.getPlace();
-        String inputContractor = inputProject.getContractor();
-        String inputCompanyResposible = inputProject.getCompanyResposible();
-
-        // Używamy nowej metody z repozytorium, przekazując ID, które należy zignorować
-        if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndIdNot(inputName,
-                inputPlace,"active", inputContractor,inputCompanyResposible, idToExclude)){
             throw new IllegalArgumentException("Identical project already exists!");
         }
     }
