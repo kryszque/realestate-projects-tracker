@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
@@ -10,7 +11,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class ProjectSpecifications {
-    public static Specification<Project> createSearch(ProjectSearchCriteria criteria) {
+    public static Specification<Project> createSearch(SearchingCriteria criteria) {
         return (root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 

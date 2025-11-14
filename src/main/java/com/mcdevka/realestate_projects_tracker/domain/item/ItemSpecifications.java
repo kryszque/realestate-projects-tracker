@@ -5,12 +5,13 @@ import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 
 import java.util.ArrayList;
 import java.util.List;
 
 public class ItemSpecifications {
-    public static Specification<Item> createSearch(ItemSearchCriteria criteria){
+    public static Specification<Item> createSearch(SearchingCriteria criteria){
         return(root, criteriaQuery, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
 

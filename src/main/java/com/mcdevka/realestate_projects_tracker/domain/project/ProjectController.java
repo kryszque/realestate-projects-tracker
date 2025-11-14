@@ -98,10 +98,10 @@ public class ProjectController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Project>> searchProjects(
-            @ModelAttribute ProjectSearchCriteria criteria){
-        List<Project> result = projectService.searchProjects(criteria);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<List<Project>> searchProjects(
+//            @ModelAttribute ProjectSearchCriteria criteria){
+//        List<Project> result = projectService.searchProjects(criteria);
+//        return ResponseEntity.ok(result);
+//    }
 }

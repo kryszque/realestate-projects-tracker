@@ -94,10 +94,10 @@ public class ItemController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Item>> searchItems(
-            @ModelAttribute ItemSearchCriteria criteria){
-        List<Item> result =  itemService.searchItems(criteria);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<List<Item>> searchItems(
+//            @ModelAttribute ItemSearchCriteria criteria){
+//        List<Item> result =  itemService.searchItems(criteria);
+//        return ResponseEntity.ok(result);
+//    }
 }

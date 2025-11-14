@@ -3,9 +3,9 @@ package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
-import com.mcdevka.realestate_projects_tracker.domain.project.ProjectSpecifications;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -106,7 +106,7 @@ public class PillarService {
         return pillarRepository.save(finishedPillar);
     }
 
-    public List<Pillar> searchPillars(PillarSearchCriteria criteria){
+    public List<Pillar> searchPillars(SearchingCriteria criteria){
         Specification<Pillar> spec = PillarSpecifications.createSearch(criteria);
         return pillarRepository.findAll(spec);
     }

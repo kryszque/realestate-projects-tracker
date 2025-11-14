@@ -71,10 +71,10 @@ public class PillarController {
         }
     }
 
-    @GetMapping("/search")
-    public ResponseEntity<List<Pillar>> searchPillars(
-            @ModelAttribute  PillarSearchCriteria criteria){
-        List<Pillar> result =  pillarService.searchPillars(criteria);
-        return ResponseEntity.ok(result);
-    }
+//    @GetMapping("/search")
+//    public ResponseEntity<List<Pillar>> searchPillars(
+//            @ModelAttribute  PillarSearchCriteria criteria){
+//        List<Pillar> result =  pillarService.searchPillars(criteria);
+//        return ResponseEntity.ok(result);
+//    }
 }

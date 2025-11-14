@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 
@@ -7,7 +8,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PillarSpecifications {
-    public static Specification<Pillar> createSearch(PillarSearchCriteria criteria) {
+    public static Specification<Pillar> createSearch(SearchingCriteria criteria) {
         return (root, criteriaQuery, criteriaBuilder) ->{
             List<Predicate> predicates = new ArrayList<>();
 

@@ -2,7 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
-import com.mcdevka.realestate_projects_tracker.domain.project.Project;
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import org.springframework.data.jpa.domain.Specification;
@@ -131,7 +131,7 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public List<Item> searchItems(ItemSearchCriteria criteria) {
+    public List<Item> searchItems(SearchingCriteria criteria) {
         Specification<Item> spec = ItemSpecifications.createSearch(criteria);
         return itemRepository.findAll(spec);
     }
