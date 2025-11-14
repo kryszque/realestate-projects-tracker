@@ -7,6 +7,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @Getter
@@ -20,6 +21,7 @@ public class Pillar {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
     private String name;
+    private LocalDate startDate;
     private String state;
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "project_id")

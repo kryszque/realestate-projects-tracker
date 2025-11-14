@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -68,5 +69,12 @@ public class PillarController {
         }  catch(IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<Pillar>> searchPillars(
+            @ModelAttribute  PillarSearchCriteria criteria){
+        List<Pillar> result =  pillarService.searchPillars(criteria);
+        return ResponseEntity.ok(result);
     }
 }

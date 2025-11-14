@@ -3,8 +3,11 @@ package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.ProjectSpecifications;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -23,18 +26,21 @@ public class PillarService {
         List<Pillar> threePillars = new ArrayList<>();
         Pillar p1 = new Pillar();
         p1.setName("Design");
+        p1.setStartDate(LocalDate.now());
         p1.setState("active");
         p1.setProject(project);
         threePillars.add(p1);
 
         Pillar p2 = new Pillar();
         p2.setName("Commercialization");
+        p2.setStartDate(LocalDate.now());
         p2.setState("active");
         p2.setProject(project);
         threePillars.add(p2);
 
         Pillar p3 = new Pillar();
         p3.setName("Sale");
+        p3.setStartDate(LocalDate.now());
         p3.setState("active");
         p3.setProject(project);
         threePillars.add(p3);
@@ -66,6 +72,7 @@ public class PillarService {
         Pillar newPillar = new  Pillar();
         newPillar.setProject(project);
         newPillar.setName(inputName);
+        newPillar.setStartDate(LocalDate.now());
         newPillar.setState("active");
 
         return pillarRepository.save(newPillar);
@@ -77,7 +84,7 @@ public class PillarService {
 
         String inputName = inputPillar.getName();
 
-        if(pillarRepository.existsByNameAndStateAndProjectIdAndIdNot(inputName, "active", projectId, pillarId)){
+        if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active", projectId)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
                     "in this project!");
         }
@@ -97,6 +104,11 @@ public class PillarService {
         Pillar finishedPillar = validateProjectId(projectId, pillarId);
         finishedPillar.setState("finished");
         return pillarRepository.save(finishedPillar);
+    }
+
+    public List<Pillar> searchPillars(PillarSearchCriteria criteria){
+        Specification<Pillar> spec = PillarSpecifications.createSearch(criteria);
+        return pillarRepository.findAll(spec);
     }
 
     private Pillar validateProjectId(Long projectId, Long pillarId){
