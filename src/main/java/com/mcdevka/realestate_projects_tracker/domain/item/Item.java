@@ -31,7 +31,7 @@ public class Item {
     private String status;
 
     @Column(nullable = false, updatable = false)
-    private LocalDate addDate;
+    private LocalDate startDate;
     private LocalDate lastChangeDate;
     private LocalDate deadline;
 
@@ -68,8 +68,8 @@ public class Item {
     @PrePersist
     protected void onCreate() {
         this.lastChangeDate = LocalDate.now();
-        if (this.addDate == null) {
-            this.addDate = LocalDate.now();
+        if (this.startDate == null) {
+            this.startDate = LocalDate.now();
         }
     }
 

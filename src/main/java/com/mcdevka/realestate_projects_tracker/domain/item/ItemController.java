@@ -75,7 +75,7 @@ public class ItemController {
     }
 
     @PostMapping("/{id}/tags/{tagId}")
-    public ResponseEntity<Item> addTagToProject(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
+    public ResponseEntity<Item> addTagToItem(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
         try {
             Item updatedItem = itemService.addTagToItem(projectId, pillarId, id, tagId);
             return ResponseEntity.ok(updatedItem);
@@ -85,7 +85,7 @@ public class ItemController {
     }
 
     @DeleteMapping("/{id}/tags/{tagId}")
-    public ResponseEntity<Item> removeTagFromProject(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
+    public ResponseEntity<Item> removeTagFromItem(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long tagId) {
         try {
             Item updatedItem = itemService.removeTagFromItem(projectId, pillarId, id, tagId);
             return ResponseEntity.ok(updatedItem);
@@ -94,4 +94,10 @@ public class ItemController {
         }
     }
 
+    @GetMapping("/search")
+    public ResponseEntity<List<Item>> searchItems(
+            @ModelAttribute ItemSearchCriteria criteria){
+        List<Item> result =  itemService.searchItems(criteria);
+        return ResponseEntity.ok(result);
+    }
 }

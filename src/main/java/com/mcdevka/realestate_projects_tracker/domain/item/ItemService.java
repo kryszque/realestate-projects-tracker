@@ -5,6 +5,7 @@ import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
@@ -73,7 +74,7 @@ public class ItemService {
     public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
 
-        checkForItemDuplicates(updatedItem.getName(), "active", pillarId, itemId);
+        checkForItemDuplicates(updatedItem.getName(), "active", pillarId);
 
         setChangableFields(updatedItem, existingItem);
         addHistoryEntry(existingItem, existingItem.getName(), existingItem.getStatus(), existingItem.getDescription(), existingItem.getDeadline());
@@ -130,14 +131,13 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    private void checkForItemDuplicates(String name, String state, Long pillarId) {
-        if (itemRepository.existsByNameAndStateAndPillarId(name, state, pillarId)) {
-            throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
-        }
+    public List<Item> searchItems(ItemSearchCriteria criteria) {
+        Specification<Item> spec = ItemSpecifications.createSearch(criteria);
+        return itemRepository.findAll(spec);
     }
 
-    private void checkForItemDuplicates(String name, String state, Long pillarId, Long idToExclude) {
-        if (itemRepository.existsByNameAndStateAndPillarIdAndIdNot(name, state, pillarId, idToExclude)) {
+    private void checkForItemDuplicates(String name, String state, Long pillarId) {
+        if (itemRepository.existsByNameAndStateAndPillarId(name, state, pillarId)) {
             throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
         }
     }
