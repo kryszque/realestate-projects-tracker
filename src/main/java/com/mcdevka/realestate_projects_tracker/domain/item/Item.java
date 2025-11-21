@@ -41,7 +41,7 @@ public class Item {
     @Column(nullable = false) // <-- DODANE: To jest ID pliku na Dysku Google
     private String googleFileId;
 
-    @Lob
+    @Column(columnDefinition = "TEXT")
     private String description;
 
     @ManyToOne(fetch = FetchType.LAZY)
