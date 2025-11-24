@@ -1,47 +1,37 @@
 package com.mcdevka.realestate_projects_tracker.domain.searching;
 
 
-import com.mcdevka.realestate_projects_tracker.domain.item.Item;
-import com.mcdevka.realestate_projects_tracker.domain.item.ItemService;
-import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
-import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
-import com.mcdevka.realestate_projects_tracker.domain.project.Project;
-import com.mcdevka.realestate_projects_tracker.domain.project.ProjectService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import java.util.ArrayList;
-import java.util.List;
-
 @RestController
+@RequiredArgsConstructor
 @RequestMapping("/api/search")
-public class SearchingController<T>{
+public class SearchingController{
 
-    private final ProjectService projectService;
-    private final PillarService pillarService;
-    private final ItemService itemService;
-
-    public  SearchingController(ProjectService projectService,  PillarService pillarService,
-                                ItemService itemService) {
-        this.projectService = projectService;
-        this.pillarService = pillarService;
-        this.itemService = itemService;
-    }
+    private final GlobalSearchingService globalSearchingService;
 
     @GetMapping
     public ResponseEntity<GlobalSearchingResultDTO> search(
-            @ModelAttribute SearchingCriteria criteria){
+            @ModelAttribute SearchingCriteria searchingCriteria){
 
-        var searchedProjects = projectService.searchProjects(criteria);
-        var searchedPillars = pillarService.searchPillars(criteria);
-        var searchedItems = itemService.searchItems(criteria);
+        GlobalSearchingResultDTO searchResult = globalSearchingService.searchInDatabase(searchingCriteria);
 
-        GlobalSearchingResultDTO result = new GlobalSearchingResultDTO(
-                searchedProjects, searchedPillars, searchedItems);
+        return ResponseEntity.ok(searchResult);
+    }
 
-        return ResponseEntity.ok(result);
+    @GetMapping("/filter")
+    public ResponseEntity<GlobalSearchingResultDTO> filterSearch(
+            @ModelAttribute SearchingCriteria searchingCriteria,
+            @ModelAttribute FilteringCriteria filteringCriteria
+    ){
+        GlobalSearchingResultDTO filterResult = globalSearchingService.
+                                                searchAndFilter(searchingCriteria, filteringCriteria);
+
+        return ResponseEntity.ok(filterResult);
     }
 }
