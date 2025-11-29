@@ -59,13 +59,8 @@ public class ItemService {
 
         Item createdItem = new Item();
 
-        createdItem.setWebViewLink(inputItem.getWebViewLink());
-        createdItem.setGoogleFileId(inputItem.getGoogleFileId());
-
         setChangableFields(inputItem, createdItem);
         createdItem.setPillar(pillar);
-
-        addHistoryEntry(createdItem, createdItem.getName(), createdItem.getStatus(), createdItem.getDescription(), createdItem.getDeadline());
 
         return itemRepository.save(createdItem);
     }
@@ -77,7 +72,6 @@ public class ItemService {
         checkForItemDuplicates(updatedItem.getName(), "active", pillarId);
 
         setChangableFields(updatedItem, existingItem);
-        addHistoryEntry(existingItem, existingItem.getName(), existingItem.getStatus(), existingItem.getDescription(), existingItem.getDeadline());
 
         return itemRepository.save(existingItem);
     }
@@ -96,15 +90,27 @@ public class ItemService {
         return itemRepository.save(finishedItem);
     }
 
-    private void addHistoryEntry(Item item, String name, String status, String description, LocalDate deadline) {
-        ItemHistory historyEntry = new ItemHistory(item, name, status, description, deadline);
+    @Transactional
+    public ItemHistory addHistoryEntry(Long projectId, Long pillarId, Long itemId, ItemHistory itemHistory) {
+        Item item = getItemById(projectId, pillarId, itemId);
+
+        ItemHistory historyEntry = new ItemHistory();
+
+        historyEntry.setItem(item);
+        historyEntry.setChangeDate(LocalDate.now());
+        historyEntry.setDescription(itemHistory.getDescription());
+        historyEntry.setGoogleFileId(historyEntry.getGoogleFileId());
+        historyEntry.setWebViewLink(historyEntry.getWebViewLink());
 
         item.getHistoryEntries().add(historyEntry);
+
+        return historyEntry;
     }
 
     private void setChangableFields(Item inputItem, Item existingItem){
         existingItem.setName(inputItem.getName());
         existingItem.setStatus(inputItem.getStatus());
+        existingItem.setPriority(inputItem.getPriority());
         existingItem.setDeadline(inputItem.getDeadline());
         existingItem.setDescription(inputItem.getDescription());
     }

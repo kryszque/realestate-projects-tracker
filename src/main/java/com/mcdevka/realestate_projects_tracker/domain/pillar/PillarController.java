@@ -10,6 +10,7 @@ import java.util.List;
 
 @RestController
 @RequestMapping("api/projects/{projectId}/pillars")
+@CrossOrigin(origins = "http://localhost:5173")
 public class PillarController {
     private final PillarService pillarService;
 

@@ -18,29 +18,16 @@ public class ItemHistory {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String name;
-
-    @Column(nullable = false)
     private LocalDate changeDate;
 
-    @Column(nullable = false)
-    private String newStatus;
+    private String webViewLink; // <-- ZMIANA: Bardziej precyzyjny (to jest link do podglądu)
+
+    private String googleFileId;
 
     private String description;
-
-    private LocalDate deadline;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     @JsonBackReference
     private Item item;
-
-    public ItemHistory(Item item, String name, String newStatus, String description, LocalDate deadline) {
-        this.item = item;
-        this.name = name;
-        this.newStatus = newStatus;
-        this.description = description;
-        this.changeDate = LocalDate.now();
-        this.deadline = deadline;
-    }
 }

@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.Set;
@@ -22,6 +23,8 @@ public class Project {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    private Integer priority;
 
     @Column(nullable = false)
     private String name;
@@ -51,6 +54,7 @@ public class Project {
             orphanRemoval = true
     )
     @JsonManagedReference
+    @Where(clause = "state != 'archived'")
     private List<Pillar> pillars;
 
 }

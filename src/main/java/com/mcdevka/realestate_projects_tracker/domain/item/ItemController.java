@@ -94,6 +94,16 @@ public class ItemController {
         }
     }
 
+    @PostMapping("/{id}")
+    public ResponseEntity<ItemHistory> createItemHistory(@PathVariable Long projectId, @PathVariable Long pillarId, @PathVariable Long id, @RequestBody ItemHistory itemHistory) {
+        try {
+            ItemHistory createdItemHistory = itemService.addHistoryEntry(projectId, pillarId, id, itemHistory);
+            return new ResponseEntity<>(createdItemHistory, HttpStatus.CREATED);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
 //    @GetMapping("/search")
 //    public ResponseEntity<List<Item>> searchItems(
 //            @ModelAttribute ItemSearchCriteria criteria){

@@ -25,6 +25,8 @@ public class Item {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    private Integer priority;
+
     @Column(nullable = false)
     private String name;
     private String state = "active";
@@ -32,14 +34,7 @@ public class Item {
 
     @Column(nullable = false, updatable = false)
     private LocalDate startDate;
-    private LocalDate lastChangeDate;
     private LocalDate deadline;
-
-    @Column(nullable = false)
-    private String webViewLink; // <-- ZMIANA: Bardziej precyzyjny (to jest link do podglądu)
-
-    @Column(nullable = false) // <-- DODANE: To jest ID pliku na Dysku Google
-    private String googleFileId;
 
     @Column(columnDefinition = "TEXT")
     private String description;
@@ -67,14 +62,8 @@ public class Item {
 
     @PrePersist
     protected void onCreate() {
-        this.lastChangeDate = LocalDate.now();
         if (this.startDate == null) {
             this.startDate = LocalDate.now();
         }
-    }
-
-    @PreUpdate
-    protected void onUpdate() {
-        this.lastChangeDate = LocalDate.now();
     }
 }

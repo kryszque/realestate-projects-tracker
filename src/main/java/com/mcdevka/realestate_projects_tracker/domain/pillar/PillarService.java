@@ -49,7 +49,7 @@ public class PillarService {
     }
 
     public Pillar getPillarById(Long id){
-        return pillarRepository.findById(id)
+        return pillarRepository.findByIdAndStateNot(id, "archived")
                 .orElseThrow(() -> new IllegalArgumentException("Pillar with id " + id + " not found!"));
     }
 
@@ -72,6 +72,7 @@ public class PillarService {
         Pillar newPillar = new  Pillar();
         newPillar.setProject(project);
         newPillar.setName(inputName);
+        newPillar.setPriority(inputPillar.getPriority());
         newPillar.setStartDate(LocalDate.now());
         newPillar.setState("active");
 
@@ -90,6 +91,7 @@ public class PillarService {
         }
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
         updatedPillar.setName(inputName);
+        updatedPillar.setPriority(inputPillar.getPriority());
         return pillarRepository.save(updatedPillar);
     }
 
@@ -112,11 +114,17 @@ public class PillarService {
     }
 
     private Pillar validateProjectId(Long projectId, Long pillarId){
-        Pillar pillar = getPillarById(pillarId);
+        Pillar pillar = getPillarByIdUnfiltered(pillarId);
         if(!pillar.getProject().getId().equals(projectId)){
             throw new IllegalArgumentException("Pillat with id" +
                     pillarId + " doesn't belong to project id: " + projectId);
         }
         return pillar;
+    }
+
+    public Pillar getPillarByIdUnfiltered(Long id){
+        // Używamy domyślnego findById, które pobiera WSZYSTKO z bazy
+        return pillarRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Pillar with ID " + id + " does not exist!"));
     }
 }

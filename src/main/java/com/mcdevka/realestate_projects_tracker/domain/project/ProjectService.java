@@ -25,7 +25,7 @@ public class ProjectService {
     }
 
     public List<Project> getAllProjects(){
-        return projectRepository.findAll();
+        return projectRepository.findByStateNot("archived");
     }
 
     public Project getProjectById(Long id){
@@ -43,6 +43,7 @@ public class ProjectService {
 
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
+        createdProject.setPriority(inputProject.getPriority());
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
         //TODO provide fields that can NOT be null when creating a createdProject + EXCEPTIONS!!
@@ -112,6 +113,7 @@ public class ProjectService {
     private void setChangableFields(Project inputProject, Project existingProject){
         existingProject.setName(inputProject.getName());
         existingProject.setPlace(inputProject.getPlace());
+        existingProject.setPriority(inputProject.getPriority());
         existingProject.setContractor(inputProject.getContractor());
         existingProject.setCompanyResposible(inputProject.getCompanyResposible());
     }
