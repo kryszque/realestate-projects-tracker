@@ -43,6 +43,12 @@ public class ItemSpecifications {
                 ));
             }
 
+            if(criteria.getPriority() != null) {
+                predicates.add(criteriaBuilder.equal(
+                        root.get("priority"), criteria.getPriority()
+                ));
+            }
+
             return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }

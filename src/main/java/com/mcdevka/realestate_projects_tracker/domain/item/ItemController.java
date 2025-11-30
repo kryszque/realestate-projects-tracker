@@ -103,11 +103,4 @@ public class ItemController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
         }
     }
-
-//    @GetMapping("/search")
-//    public ResponseEntity<List<Item>> searchItems(
-//            @ModelAttribute ItemSearchCriteria criteria){
-//        List<Item> result =  itemService.searchItems(criteria);
-//        return ResponseEntity.ok(result);
-//    }
 }

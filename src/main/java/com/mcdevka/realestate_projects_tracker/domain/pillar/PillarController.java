@@ -71,11 +71,4 @@ public class PillarController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
-//    @GetMapping("/search")
-//    public ResponseEntity<List<Pillar>> searchPillars(
-//            @ModelAttribute  PillarSearchCriteria criteria){
-//        List<Pillar> result =  pillarService.searchPillars(criteria);
-//        return ResponseEntity.ok(result);
-//    }
 }
