@@ -71,4 +71,28 @@ public class PillarController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    @PostMapping("/{pillarId}/tags/{tagId}")
+    public ResponseEntity<Pillar> addTagToProject(@PathVariable Long projectId,
+                                                   @PathVariable Long pillarId,
+                                                   @PathVariable Long tagId) {
+        try {
+            Pillar updatedPillar = pillarService.addTagToPillar(projectId, pillarId, tagId);
+            return ResponseEntity.ok(updatedPillar);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @DeleteMapping("/{pillarId}/tags/{tagId}")
+    public ResponseEntity<Pillar> removeTagFromProject(@PathVariable Long projectId,
+                                                        @PathVariable Long pillarId,
+                                                        @PathVariable Long tagId) {
+        try {
+            Pillar updatedPillar = pillarService.removeTagFromPillar(projectId, pillarId, tagId);
+            return ResponseEntity.ok(updatedPillar);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }
