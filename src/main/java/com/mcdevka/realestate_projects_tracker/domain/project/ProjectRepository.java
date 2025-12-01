@@ -9,9 +9,10 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
-    boolean existsByNameAndPlaceAndStateAndContractorAndCompanyResposible(String projectName,
-                                                                          String place, String state,
-                                                                          String contractor,
-                                                                          String companyResposible);
+    boolean existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndPriority(String projectName,
+                                                                                     String place, String state,
+                                                                                     String contractor,
+                                                                                     String companyResposible,
+                                                                                     Integer priority);
     List<Project> findByStateNot(String state);
 }

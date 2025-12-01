@@ -29,6 +29,7 @@ public class PillarService {
         p1.setStartDate(LocalDate.now());
         p1.setState("active");
         p1.setProject(project);
+        p1.setPriority(3);
         threePillars.add(p1);
 
         Pillar p2 = new Pillar();
@@ -36,6 +37,7 @@ public class PillarService {
         p2.setStartDate(LocalDate.now());
         p2.setState("active");
         p2.setProject(project);
+        p2.setPriority(3);
         threePillars.add(p2);
 
         Pillar p3 = new Pillar();
@@ -43,6 +45,7 @@ public class PillarService {
         p3.setStartDate(LocalDate.now());
         p3.setState("active");
         p3.setProject(project);
+        p3.setPriority(3);
         threePillars.add(p3);
 
         return threePillars;
@@ -64,8 +67,9 @@ public class PillarService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
         String inputName = inputPillar.getName();
+        Integer inputPriority = inputPillar.getPriority();
 
-        if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active",  projectId)){
+        if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active",  projectId, inputPriority)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists in " +
                                                 "this project!");
         }
@@ -84,8 +88,9 @@ public class PillarService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
         String inputName = inputPillar.getName();
+        Integer inputPriority = inputPillar.getPriority();
 
-        if(pillarRepository.existsByNameAndStateAndProjectId(inputName, "active", projectId)){
+        if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active", projectId, inputPriority)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
                     "in this project!");
         }

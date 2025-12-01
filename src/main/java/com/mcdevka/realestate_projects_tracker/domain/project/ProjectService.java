@@ -103,9 +103,10 @@ public class ProjectService {
         String inputPlace = inputProject.getPlace();
         String inputContractor = inputProject.getContractor();
         String inputCompanyResposible = inputProject.getCompanyResposible();
+        Integer inputPriority = inputProject.getPriority();
 
-        if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposible(inputName,
-                inputPlace,"active", inputContractor,inputCompanyResposible)){
+        if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndPriority(inputName,
+                inputPlace,"active", inputContractor,inputCompanyResposible,inputPriority)){
             throw new IllegalArgumentException("Identical project already exists!");
         }
     }
