@@ -10,4 +10,5 @@ public class SearchingCriteria {
     private String tagName;
     private LocalDate createdAfter;
     private LocalDate createdBefore;
+    private Integer priority;
 }

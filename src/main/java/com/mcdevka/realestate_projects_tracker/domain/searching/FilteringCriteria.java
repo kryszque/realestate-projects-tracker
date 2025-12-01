@@ -11,5 +11,5 @@ public class FilteringCriteria {
     private boolean filterByPillar = true;
     private boolean filterByItem = true;
     private List<String> filteredTagsNames;
-    private int filteredPriority;
+    private Integer filteredPriority;
 }

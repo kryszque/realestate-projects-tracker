@@ -98,11 +98,4 @@ public class ProjectController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
-
-//    @GetMapping("/search")
-//    public ResponseEntity<List<Project>> searchProjects(
-//            @ModelAttribute ProjectSearchCriteria criteria){
-//        List<Project> result = projectService.searchProjects(criteria);
-//        return ResponseEntity.ok(result);
-//    }
 }

@@ -3,6 +3,8 @@ package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
+import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
+import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
@@ -16,10 +18,13 @@ public class PillarService {
 
     private final PillarRepository pillarRepository;
     private final ProjectRepository projectRepository;
+    private final TagRepository tagRepository;
 
-    public PillarService(PillarRepository pillarRepository, ProjectRepository projectRepository) {
+    public PillarService(PillarRepository pillarRepository, ProjectRepository projectRepository,
+                         TagRepository tagRepository) {
         this.pillarRepository = pillarRepository;
         this.projectRepository = projectRepository;
+        this.tagRepository = tagRepository;
     }
 
     public List<Pillar> initializeDefaultPillars(Project project){
@@ -111,6 +116,26 @@ public class PillarService {
         Pillar finishedPillar = validateProjectId(projectId, pillarId);
         finishedPillar.setState("finished");
         return pillarRepository.save(finishedPillar);
+    }
+
+    public Pillar addTagToPillar(Long projectId, Long pillarId, Long tagId){
+        Pillar pillar = getPillarById(pillarId);
+
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new IllegalArgumentException("Tag o ID " + tagId + " nie istnieje."));
+
+        pillar.getTags().add(tag);
+        return pillarRepository.save(pillar);
+    }
+
+    public Pillar removeTagFromPillar(Long projectId, Long pillarId, Long tagId){
+        Pillar pillar = getPillarById(pillarId);
+
+        Tag tag = tagRepository.findById(tagId)
+                .orElseThrow(() -> new IllegalArgumentException("Tag o ID " + tagId + " nie istnieje."));
+
+        pillar.getTags().remove(tag);
+        return pillarRepository.save(pillar);
     }
 
     public List<Pillar> searchPillars(SearchingCriteria criteria){
