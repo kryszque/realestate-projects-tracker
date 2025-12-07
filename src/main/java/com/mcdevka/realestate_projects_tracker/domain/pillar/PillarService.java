@@ -112,10 +112,10 @@ public class PillarService {
         updatedPillar.setName(inputName);
         updatedPillar.setPriority(inputPillar.getPriority());
 
-        if (updatedPillar.getTags() != null) {
+        if (inputPillar.getTags() != null) {
             Set<Tag> updatedTags = new HashSet<>();
 
-            for (var tagDto : updatedPillar.getTags()) {
+            for (var tagDto : inputPillar.getTags()) {
                 if (tagDto.getId() != null) {
                     Tag tag = tagRepository.findById(tagDto.getId())
                             .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
