@@ -26,6 +26,8 @@ public class ItemHistory {
 
     private String description;
 
+    private String author;
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
     @JsonBackReference

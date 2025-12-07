@@ -11,7 +11,9 @@ import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteri
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PillarService {
@@ -84,6 +86,18 @@ public class PillarService {
         newPillar.setPriority(inputPillar.getPriority());
         newPillar.setStartDate(LocalDate.now());
         newPillar.setState("active");
+
+        if (inputPillar.getTags() != null && !inputPillar.getTags().isEmpty()) {
+            Set<Tag> tagsToAdd = new HashSet<>();
+
+            for (var tagDto : inputPillar.getTags()) {
+                Tag tag = tagRepository.findById(tagDto.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId()));
+                tagsToAdd.add(tag);
+            }
+
+            newPillar.setTags(tagsToAdd);
+        }
 
         return pillarRepository.save(newPillar);
     }

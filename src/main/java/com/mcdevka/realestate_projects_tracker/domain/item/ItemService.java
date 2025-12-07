@@ -10,7 +10,9 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ItemService {
@@ -62,6 +64,18 @@ public class ItemService {
         setChangableFields(inputItem, createdItem);
         createdItem.setPillar(pillar);
 
+        if (inputItem.getTags() != null && !inputItem.getTags().isEmpty()) {
+            Set<Tag> tagsToAdd = new HashSet<>();
+
+            for (var tagDto : inputItem.getTags()) {
+                Tag tag = tagRepository.findById(tagDto.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId()));
+                tagsToAdd.add(tag);
+            }
+
+            createdItem.setTags(tagsToAdd);
+        }
+
         return itemRepository.save(createdItem);
     }
 
@@ -99,8 +113,9 @@ public class ItemService {
         historyEntry.setItem(item);
         historyEntry.setChangeDate(LocalDate.now());
         historyEntry.setDescription(itemHistory.getDescription());
-        historyEntry.setGoogleFileId(historyEntry.getGoogleFileId());
-        historyEntry.setWebViewLink(historyEntry.getWebViewLink());
+        historyEntry.setGoogleFileId(itemHistory.getGoogleFileId());
+        historyEntry.setWebViewLink(itemHistory.getWebViewLink());
+        historyEntry.setAuthor(itemHistory.getAuthor());
 
         item.getHistoryEntries().add(historyEntry);
 
@@ -112,7 +127,6 @@ public class ItemService {
         existingItem.setStatus(inputItem.getStatus());
         existingItem.setPriority(inputItem.getPriority());
         existingItem.setDeadline(inputItem.getDeadline());
-        existingItem.setDescription(inputItem.getDescription());
     }
 
     @Transactional
@@ -135,6 +149,14 @@ public class ItemService {
 
         item.getTags().remove(tag);
         return itemRepository.save(item);
+    }
+
+    @Transactional
+    public List<ItemHistory> getItemHistoryByItemId(Long projectId, Long pillarId, Long itemId) {
+        Item item = getItemById(projectId, pillarId, itemId);
+        List<ItemHistory> history = item.getHistoryEntries();
+
+        return history;
     }
 
     public List<Item> searchItems(SearchingCriteria criteria) {
