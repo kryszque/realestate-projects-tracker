@@ -66,11 +66,23 @@ public class ProjectService {
 
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
 
-        checkForProjectDuplicates(updatedProjectData);
-
         Project existingProject = getProjectById(id);
 
         setChangableFields(updatedProjectData, existingProject);
+
+        if (updatedProjectData.getTags() != null) {
+            Set<Tag> updatedTags = new HashSet<>();
+
+            for (var tagDto : updatedProjectData.getTags()) {
+                if (tagDto.getId() != null) {
+                    Tag tag = tagRepository.findById(tagDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
+                    updatedTags.add(tag);
+                }
+            }
+
+            existingProject.setTags(updatedTags);
+        }
 
         return projectRepository.save(existingProject);
     }

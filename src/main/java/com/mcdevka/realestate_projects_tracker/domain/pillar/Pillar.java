@@ -7,6 +7,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.HashSet;
@@ -48,5 +49,6 @@ public class Pillar {
              orphanRemoval = true
     )
     @JsonManagedReference
+    @Where(clause = "state != 'archived'")
     List<Item> items;
 }

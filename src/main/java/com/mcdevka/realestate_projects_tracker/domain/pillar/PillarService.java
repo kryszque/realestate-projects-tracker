@@ -107,15 +107,25 @@ public class PillarService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
         String inputName = inputPillar.getName();
-        Integer inputPriority = inputPillar.getPriority();
 
-        if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active", projectId, inputPriority)){
-            throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
-                    "in this project!");
-        }
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
         updatedPillar.setName(inputName);
         updatedPillar.setPriority(inputPillar.getPriority());
+
+        if (updatedPillar.getTags() != null) {
+            Set<Tag> updatedTags = new HashSet<>();
+
+            for (var tagDto : updatedPillar.getTags()) {
+                if (tagDto.getId() != null) {
+                    Tag tag = tagRepository.findById(tagDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
+                    updatedTags.add(tag);
+                }
+            }
+
+            updatedPillar.setTags(updatedTags);
+        }
+
         return pillarRepository.save(updatedPillar);
     }
 

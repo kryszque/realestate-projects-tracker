@@ -83,9 +83,21 @@ public class ItemService {
     public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
 
-        checkForItemDuplicates(updatedItem.getName(), "active", pillarId, updatedItem.getPriority());
-
         setChangableFields(updatedItem, existingItem);
+
+        if (updatedItem.getTags() != null) {
+            Set<Tag> updatedTags = new HashSet<>();
+
+            for (var tagDto : updatedItem.getTags()) {
+                if (tagDto.getId() != null) {
+                    Tag tag = tagRepository.findById(tagDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
+                    updatedTags.add(tag);
+                }
+            }
+
+            existingItem.setTags(updatedTags);
+        }
 
         return itemRepository.save(existingItem);
     }
