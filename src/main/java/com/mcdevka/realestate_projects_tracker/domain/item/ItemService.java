@@ -2,12 +2,14 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
+import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -39,7 +41,7 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_VIEW)
     @Transactional(readOnly = true)
-    public List<Item> getItemsForPillar(Long projectId, Long pillarId) {
+    public List<Item> getItemsForPillar(@ProjectId Long projectId, Long pillarId) {
         validatePillarPath(projectId, pillarId);
 
         return itemRepository.findByPillarId(pillarId);
@@ -47,7 +49,7 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_VIEW)
     @Transactional(readOnly = true)
-    public Item getItemById(Long projectId, Long pillarId, Long id) {
+    public Item getItemById(@ProjectId Long projectId, Long pillarId, Long id) {
         Item item =  itemRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found!"));
         if (!item.getPillar().getId().equals(pillarId) || !item.getPillar().getProject().getId().equals(projectId)) {
@@ -58,7 +60,7 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_CREATE)
     @Transactional
-    public Item createItem(Long projectId, Long pillarId, Item inputItem) {
+    public Item createItem(@ProjectId Long projectId, Long pillarId, Item inputItem) {
         Pillar pillar = validatePillarPath(projectId, pillarId);
 
         checkForItemDuplicates(inputItem.getName(), "active", pillarId, inputItem.getPriority());
@@ -73,7 +75,7 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
-    public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItem) {
+    public Item updateItem(@ProjectId Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
 
         checkForItemDuplicates(updatedItem.getName(), "active", pillarId, updatedItem.getPriority());
@@ -85,7 +87,7 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_DELETE)
     @Transactional
-    public Item archiveItem(Long projectId, Long pillarId, Long id){
+    public Item archiveItem(@ProjectId Long projectId, Long pillarId, Long id){
         Item archivedItem = getItemById(projectId, pillarId, id);
         archivedItem.setState("archived");
         return itemRepository.save(archivedItem);
@@ -93,14 +95,14 @@ public class ItemService {
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
-    public Item finishItem(Long projectId, Long pillarId, Long id){
+    public Item finishItem(@ProjectId Long projectId, Long pillarId, Long id){
         Item finishedItem = getItemById(projectId, pillarId, id);
         finishedItem.setState("finished");
         return itemRepository.save(finishedItem);
     }
 
     @Transactional
-    public ItemHistory addHistoryEntry(Long projectId, Long pillarId, Long itemId, ItemHistory itemHistory) {
+    public ItemHistory addHistoryEntry(@ProjectId Long projectId, Long pillarId, Long itemId, ItemHistory itemHistory) {
         Item item = getItemById(projectId, pillarId, itemId);
 
         ItemHistory historyEntry = new ItemHistory();
@@ -125,7 +127,8 @@ public class ItemService {
     }
 
     @Transactional
-    public Item addTagToItem(Long projectId, Long pillarId, Long itemId, Long tagId) {
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Item addTagToItem(@ProjectId Long projectId, Long pillarId, Long itemId, Long tagId) {
         Item item = getItemById(projectId, pillarId, itemId);
 
         Tag tag = tagRepository.findById(tagId)
@@ -136,7 +139,8 @@ public class ItemService {
     }
 
     @Transactional
-    public Item removeTagFromItem(Long projectId, Long pillarId, Long itemId, Long tagId) {
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Item removeTagFromItem(@ProjectId Long projectId, Long pillarId, Long itemId, Long tagId) {
         Item item = getItemById(projectId, pillarId, itemId);
 
         Tag tag = tagRepository.findById(tagId)

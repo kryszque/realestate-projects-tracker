@@ -19,7 +19,7 @@ public class AccessControlService {
     private final ProjectRepository projectRepository;
     private final ProjectAccessRepository projectAccessRepository;
 
-    private User getCurrentUser(){
+    public User getCurrentUser(){
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         return (User) authentication.getPrincipal();
     }
@@ -55,5 +55,6 @@ public class AccessControlService {
         if(currentUser.getRole() == Role.ADMIN) {
             return;
         }
+
     }
 }

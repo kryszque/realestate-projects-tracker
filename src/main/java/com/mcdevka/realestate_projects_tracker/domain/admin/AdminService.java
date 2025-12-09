@@ -51,7 +51,7 @@ public class AdminService {
                         .project(project)
                         .build());
 
-        access.setPermissions(request.grantedPermissions());;
+        access.setPermissions(grantedPermissions);;
         projectAccessRepository.save(access);
     }
 
