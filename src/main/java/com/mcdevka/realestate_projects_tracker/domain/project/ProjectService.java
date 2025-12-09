@@ -1,9 +1,12 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -24,15 +27,18 @@ public class ProjectService {
 
     }
 
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
     public List<Project> getAllProjects(){
         return projectRepository.findByStateNot("archived");
     }
 
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
     public Project getProjectById(Long id){
         return projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + id + " not found!"));
     }
 
+    @CheckAccess(ProjectPermissions.CAN_CREATE)
     public Project createProject(Project inputProject){
 
         checkForProjectDuplicates(inputProject);
@@ -50,6 +56,7 @@ public class ProjectService {
         return projectRepository.save(createdProject);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
 
         checkForProjectDuplicates(updatedProjectData);
@@ -61,18 +68,21 @@ public class ProjectService {
         return projectRepository.save(existingProject);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_DELETE)
     public Project archiveProject(Long id){
         Project archivedProject = getProjectById(id);
         archivedProject.setState("archived");
         return projectRepository.save(archivedProject);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     public Project finishProject(Long id){
         Project finishedProject = getProjectById(id);
         finishedProject.setState("finished");
         return projectRepository.save(finishedProject);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     public Project addTagToProject(Long projectId, Long tagId) {
         Project project = getProjectById(projectId);
 
@@ -83,6 +93,7 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     public Project removeTagFromProject(Long projectId, Long tagId) {
         Project project = getProjectById(projectId);
 
@@ -93,8 +104,8 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public List<Project> searchProjects(SearchingCriteria criteria) {
-        Specification<Project> spec = ProjectSpecifications.createSearch(criteria);
+    public List<Project> searchProjects(SearchingCriteria criteria, User currentUser) {
+        Specification<Project> spec = ProjectSpecifications.createSearch(criteria, currentUser);
         return projectRepository.findAll(spec);
     }
 

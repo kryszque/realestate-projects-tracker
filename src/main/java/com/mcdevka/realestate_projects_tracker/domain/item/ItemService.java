@@ -2,9 +2,12 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
@@ -34,6 +37,7 @@ public class ItemService {
         return pillar;
     }
 
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
     @Transactional(readOnly = true)
     public List<Item> getItemsForPillar(Long projectId, Long pillarId) {
         validatePillarPath(projectId, pillarId);
@@ -41,6 +45,7 @@ public class ItemService {
         return itemRepository.findByPillarId(pillarId);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
     @Transactional(readOnly = true)
     public Item getItemById(Long projectId, Long pillarId, Long id) {
         Item item =  itemRepository.findById(id)
@@ -51,6 +56,7 @@ public class ItemService {
         return item;
     }
 
+    @CheckAccess(ProjectPermissions.CAN_CREATE)
     @Transactional
     public Item createItem(Long projectId, Long pillarId, Item inputItem) {
         Pillar pillar = validatePillarPath(projectId, pillarId);
@@ -65,6 +71,7 @@ public class ItemService {
         return itemRepository.save(createdItem);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
     public Item updateItem(Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
@@ -76,6 +83,7 @@ public class ItemService {
         return itemRepository.save(existingItem);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_DELETE)
     @Transactional
     public Item archiveItem(Long projectId, Long pillarId, Long id){
         Item archivedItem = getItemById(projectId, pillarId, id);
@@ -83,6 +91,7 @@ public class ItemService {
         return itemRepository.save(archivedItem);
     }
 
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
     public Item finishItem(Long projectId, Long pillarId, Long id){
         Item finishedItem = getItemById(projectId, pillarId, id);
@@ -137,8 +146,8 @@ public class ItemService {
         return itemRepository.save(item);
     }
 
-    public List<Item> searchItems(SearchingCriteria criteria) {
-        Specification<Item> spec = ItemSpecifications.createSearch(criteria);
+    public List<Item> searchItems(SearchingCriteria criteria, User currentUser) {
+        Specification<Item> spec = ItemSpecifications.createSearch(criteria, currentUser);
         return itemRepository.findAll(spec);
     }
 

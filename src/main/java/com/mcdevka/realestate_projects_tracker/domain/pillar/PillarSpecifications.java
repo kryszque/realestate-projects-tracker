@@ -3,6 +3,8 @@ package com.mcdevka.realestate_projects_tracker.domain.pillar;
 import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
+import com.mcdevka.realestate_projects_tracker.domain.user.Role;
+import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -12,9 +14,19 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class PillarSpecifications {
-    public static Specification<Pillar> createSearch(SearchingCriteria criteria) {
+    public static Specification<Pillar> createSearch(SearchingCriteria criteria, User user) {
         return (root, criteriaQuery, criteriaBuilder) ->{
             List<Predicate> predicates = new ArrayList<>();
+
+            if(user.getRole() != Role.ADMIN) {
+                if(user.getCompany() == null){
+                    predicates.add(criteriaBuilder.disjunction());
+                }
+                else {
+                    predicates.add(criteriaBuilder.equal(root.get("project").get("companyResponsible"),
+                            user.getCompany()));
+                }
+            }
 
             if(criteria.getName() != null &&  !criteria.getName().isEmpty()) {
                 predicates.add(criteriaBuilder.like(
