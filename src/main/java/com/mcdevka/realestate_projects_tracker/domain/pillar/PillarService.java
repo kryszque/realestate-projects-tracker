@@ -11,7 +11,9 @@ import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteri
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class PillarService {
@@ -85,6 +87,18 @@ public class PillarService {
         newPillar.setStartDate(LocalDate.now());
         newPillar.setState("active");
 
+        if (inputPillar.getTags() != null && !inputPillar.getTags().isEmpty()) {
+            Set<Tag> tagsToAdd = new HashSet<>();
+
+            for (var tagDto : inputPillar.getTags()) {
+                Tag tag = tagRepository.findById(tagDto.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId()));
+                tagsToAdd.add(tag);
+            }
+
+            newPillar.setTags(tagsToAdd);
+        }
+
         return pillarRepository.save(newPillar);
     }
 
@@ -93,15 +107,25 @@ public class PillarService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
         String inputName = inputPillar.getName();
-        Integer inputPriority = inputPillar.getPriority();
 
-        if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active", projectId, inputPriority)){
-            throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists " +
-                    "in this project!");
-        }
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
         updatedPillar.setName(inputName);
         updatedPillar.setPriority(inputPillar.getPriority());
+
+        if (inputPillar.getTags() != null) {
+            Set<Tag> updatedTags = new HashSet<>();
+
+            for (var tagDto : inputPillar.getTags()) {
+                if (tagDto.getId() != null) {
+                    Tag tag = tagRepository.findById(tagDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
+                    updatedTags.add(tag);
+                }
+            }
+
+            updatedPillar.setTags(updatedTags);
+        }
+
         return pillarRepository.save(updatedPillar);
     }
 

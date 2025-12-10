@@ -36,9 +36,6 @@ public class Item {
     private LocalDate startDate;
     private LocalDate deadline;
 
-    @Column(columnDefinition = "TEXT")
-    private String description;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "pillar_id")
     @JsonBackReference

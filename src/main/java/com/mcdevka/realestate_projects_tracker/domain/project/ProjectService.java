@@ -8,7 +8,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Service
 public class ProjectService {
@@ -46,17 +48,41 @@ public class ProjectService {
         createdProject.setPriority(inputProject.getPriority());
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
+        if (inputProject.getTags() != null && !inputProject.getTags().isEmpty()) {
+            Set<Tag> tagsToAdd = new HashSet<>();
+
+            for (var tagDto : inputProject.getTags()) {
+                Tag tag = tagRepository.findById(tagDto.getId())
+                        .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId()));
+                tagsToAdd.add(tag);
+            }
+
+            createdProject.setTags(tagsToAdd);
+        }
+
         //TODO provide fields that can NOT be null when creating a createdProject + EXCEPTIONS!!
         return projectRepository.save(createdProject);
     }
 
     public Project updateProjectInfo(Long id, Project updatedProjectData) {
 
-        checkForProjectDuplicates(updatedProjectData);
-
         Project existingProject = getProjectById(id);
 
         setChangableFields(updatedProjectData, existingProject);
+
+        if (updatedProjectData.getTags() != null) {
+            Set<Tag> updatedTags = new HashSet<>();
+
+            for (var tagDto : updatedProjectData.getTags()) {
+                if (tagDto.getId() != null) {
+                    Tag tag = tagRepository.findById(tagDto.getId())
+                            .orElseThrow(() -> new IllegalArgumentException("Tag not found with ID: " + tagDto.getId()));
+                    updatedTags.add(tag);
+                }
+            }
+
+            existingProject.setTags(updatedTags);
+        }
 
         return projectRepository.save(existingProject);
     }

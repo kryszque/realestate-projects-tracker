@@ -95,13 +95,23 @@ public class ItemController {
         }
     }
 
-    @PostMapping("/{id}")
+    @PostMapping("/{id}/history")
     public ResponseEntity<ItemHistory> createItemHistory(@PathVariable Long projectId, @PathVariable Long pillarId, @PathVariable Long id, @RequestBody ItemHistory itemHistory) {
         try {
             ItemHistory createdItemHistory = itemService.addHistoryEntry(projectId, pillarId, id, itemHistory);
             return new ResponseEntity<>(createdItemHistory, HttpStatus.CREATED);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
+        }
+    }
+
+    @GetMapping("/{id}/history")
+    public ResponseEntity<List<ItemHistory>> getItemHistoryByItemId(@PathVariable Long projectId, @PathVariable Long pillarId, @PathVariable Long id) {
+        try {
+            List<ItemHistory> history = itemService.getItemHistoryByItemId(projectId, pillarId, id);
+            return ResponseEntity.ok(history);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
 }
