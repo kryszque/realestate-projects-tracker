@@ -27,8 +27,19 @@ public class TagService {
 
         Tag createdTag = new Tag();
         createdTag.setName(inputTag.getName());
+        createdTag.setColor(inputTag.getColor());
 
         return tagRepository.save(createdTag);
+    }
+
+    public Tag updateTag(Long id, Tag inputTag) {
+        Tag tag = tagRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Tag not found"));
+
+        tag.setName(inputTag.getName());
+        tag.setColor(inputTag.getColor());
+
+        return tagRepository.save(tag);
     }
 
     public Tag archiveTag(Long id){

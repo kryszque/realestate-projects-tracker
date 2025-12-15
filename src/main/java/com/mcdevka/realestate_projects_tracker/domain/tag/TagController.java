@@ -36,6 +36,15 @@ public class TagController {
         }
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<Tag> updateTag(@PathVariable Long id, @RequestBody Tag tag) {
+        try {
+            Tag updatedTag = tagService.updateTag(id, tag);
+            return ResponseEntity.ok(updatedTag);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
     @GetMapping("/{id}")
     public ResponseEntity<Tag> getTagById(@PathVariable Long id) {
         try {

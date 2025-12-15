@@ -26,6 +26,8 @@ public class Tag {
 
     private String state = "active";
 
+    private String color;
+
     @ManyToMany(mappedBy = "tags")
     @JsonIgnore
     private Set<Project> projects = new HashSet<>();
