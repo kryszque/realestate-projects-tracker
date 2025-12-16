@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-@ToString(exclude = {"project", "items"})
+@ToString(exclude = {"project", "items", "tags"})
 @EqualsAndHashCode(of = {"id"})
 @Entity
 public class Pillar {
@@ -30,9 +31,9 @@ public class Pillar {
     private String name;
     private LocalDate startDate;
     private String state;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "project_id")
-    @JsonBackReference
+    @JsonIgnoreProperties("pillars")
     private Project project;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
@@ -48,7 +49,7 @@ public class Pillar {
             cascade = CascadeType.ALL,
              orphanRemoval = true
     )
-    @JsonManagedReference
+    @JsonIgnoreProperties("pillar")
     @Where(clause = "state != 'archived'")
     List<Item> items;
 }

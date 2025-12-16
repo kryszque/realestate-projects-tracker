@@ -3,14 +3,12 @@ package com.mcdevka.realestate_projects_tracker.domain.searching;
 
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/search")
+@CrossOrigin(origins = "http://localhost:5173")
 public class SearchingController{
 
     private final GlobalSearchingService globalSearchingService;

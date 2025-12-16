@@ -1,10 +1,12 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import java.time.LocalDate;
 
@@ -12,6 +14,7 @@ import java.time.LocalDate;
 @Setter
 @NoArgsConstructor
 @Entity
+@ToString(exclude = {"item"})
 @Table(name = "item_history")
 public class ItemHistory {
     @Id
@@ -30,6 +33,6 @@ public class ItemHistory {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)
-    @JsonBackReference
+    @JsonIgnoreProperties("historyEntries")
     private Item item;
 }

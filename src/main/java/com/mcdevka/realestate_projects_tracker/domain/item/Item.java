@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
@@ -16,7 +17,7 @@ import java.util.Set;
 
 @Getter
 @Setter
-@ToString(exclude = {"pillar"})
+@ToString(exclude = {"pillar", "historyEntries", "tags"})
 @EqualsAndHashCode(of = {"id"})
 @Entity
 
@@ -36,9 +37,9 @@ public class Item {
     private LocalDate startDate;
     private LocalDate deadline;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "pillar_id")
-    @JsonBackReference
+    @JsonIgnoreProperties("items")
     private Pillar pillar;
 
     @OneToMany(
@@ -46,7 +47,6 @@ public class Item {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
-    @JsonManagedReference
     private List<ItemHistory> historyEntries = new ArrayList<>();
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
