@@ -28,6 +28,10 @@ public class Pillar {
 
     private Integer priority;
 
+    private LocalDate deadline;
+
+    private String companyResposible;
+
     private String name;
     private LocalDate startDate;
     private String state;

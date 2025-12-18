@@ -8,5 +8,5 @@ import java.util.List;
 public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificationExecutor<Item> {
     List<Item> findByPillarId(Long pillarId);
 
-    boolean existsByNameAndStateAndPillarIdAndPriority(String name, String state, Long pillarId, Integer priority);
+    boolean existsByNameAndStateAndCompanyResposibleAndPersonResponsibleAndPillarIdAndPriority(String name, String state ,String companyResposible, String personResponsible, Long pillarId, Integer priority);
 }

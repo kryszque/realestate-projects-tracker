@@ -131,7 +131,7 @@ public class ProjectService {
         String inputCompanyResposible = inputProject.getCompanyResposible();
         Integer inputPriority = inputProject.getPriority();
 
-        if(projectRepository.existsByNameAndPersonResponsibleAfterAndStateAndDeadlineAndCompanyResposibleAndPriority(inputName,
+        if(projectRepository.existsByNameAndPersonResponsibleAndStateAndDeadlineAndCompanyResposibleAndPriority(inputName,
                 inputPerson,"active", inputDeadline,inputCompanyResposible,inputPriority)){
             throw new IllegalArgumentException("Identical project already exists!");
         }

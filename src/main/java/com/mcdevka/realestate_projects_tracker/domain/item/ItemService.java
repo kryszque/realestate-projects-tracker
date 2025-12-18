@@ -57,7 +57,7 @@ public class ItemService {
     public Item createItem(Long projectId, Long pillarId, Item inputItem) {
         Pillar pillar = validatePillarPath(projectId, pillarId);
 
-        checkForItemDuplicates(inputItem.getName(), "active", pillarId, inputItem.getPriority());
+        checkForItemDuplicates(inputItem.getName(),"active" , inputItem.getCompanyResposible(), inputItem.getPersonResponsible(), pillarId, inputItem.getPriority());
 
         Item createdItem = new Item();
 
@@ -136,7 +136,8 @@ public class ItemService {
 
     private void setChangableFields(Item inputItem, Item existingItem){
         existingItem.setName(inputItem.getName());
-        existingItem.setStatus(inputItem.getStatus());
+        existingItem.setCompanyResposible(inputItem.getCompanyResposible());
+        existingItem.setPersonResponsible(inputItem.getPersonResponsible());
         existingItem.setPriority(inputItem.getPriority());
         existingItem.setDeadline(inputItem.getDeadline());
     }
@@ -176,8 +177,8 @@ public class ItemService {
         return itemRepository.findAll(spec);
     }
 
-    private void checkForItemDuplicates(String name, String state, Long pillarId, Integer priority) {
-        if (itemRepository.existsByNameAndStateAndPillarIdAndPriority(name, state, pillarId, priority)) {
+    private void checkForItemDuplicates(String name, String state, String personResponsible, String companyResposible, Long pillarId, Integer priority) {
+        if (itemRepository.existsByNameAndStateAndCompanyResposibleAndPersonResponsibleAndPillarIdAndPriority(name, state, personResponsible, companyResposible, pillarId, priority)) {
             throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
         }
     }

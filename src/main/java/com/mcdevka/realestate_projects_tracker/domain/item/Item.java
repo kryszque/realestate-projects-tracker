@@ -31,7 +31,8 @@ public class Item {
     @Column(nullable = false)
     private String name;
     private String state = "active";
-    private String status;
+    private String companyResposible;
+    private String personResponsible;
 
     @Column(nullable = false, updatable = false)
     private LocalDate startDate;

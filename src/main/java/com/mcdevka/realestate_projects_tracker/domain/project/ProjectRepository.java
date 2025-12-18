@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpecificationExecutor<Project> {
-    boolean existsByNameAndPersonResponsibleAfterAndStateAndDeadlineAndCompanyResposibleAndPriority(String projectName,
+    boolean existsByNameAndPersonResponsibleAndStateAndDeadlineAndCompanyResposibleAndPriority(String projectName,
                                                                                      String personResponsible, String state,
                                                                                      LocalDate deadline,
                                                                                      String companyResposible,

@@ -79,6 +79,8 @@ public class PillarService {
 
         String inputName = inputPillar.getName();
         Integer inputPriority = inputPillar.getPriority();
+        LocalDate inputDeadline = inputPillar.getDeadline();
+        String inputCompany = inputPillar.getCompanyResposible();
 
         if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active",  projectId, inputPriority)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists in " +
@@ -87,9 +89,12 @@ public class PillarService {
         Pillar newPillar = new  Pillar();
         newPillar.setProject(project);
         newPillar.setName(inputName);
+
         newPillar.setPriority(inputPillar.getPriority());
         newPillar.setStartDate(LocalDate.now());
         newPillar.setState("active");
+        newPillar.setCompanyResposible(inputCompany);
+        newPillar.setDeadline(inputDeadline);
 
         if (inputPillar.getTags() != null && !inputPillar.getTags().isEmpty()) {
             Set<Tag> tagsToAdd = new HashSet<>();
@@ -115,6 +120,8 @@ public class PillarService {
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
         updatedPillar.setName(inputName);
         updatedPillar.setPriority(inputPillar.getPriority());
+        updatedPillar.setDeadline(inputPillar.getDeadline());
+        updatedPillar.setCompanyResposible(inputPillar.getCompanyResposible());
 
         if (inputPillar.getTags() != null) {
             Set<Tag> updatedTags = new HashSet<>();
