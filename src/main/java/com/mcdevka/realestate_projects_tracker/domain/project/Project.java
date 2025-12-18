@@ -30,9 +30,9 @@ public class Project {
     @Column(nullable = false)
     private String name;
 
-    private String place;
+    private LocalDate deadline;
 
-    private String contractor;
+    private String personResponsible;
 
     private String companyResposible;
 

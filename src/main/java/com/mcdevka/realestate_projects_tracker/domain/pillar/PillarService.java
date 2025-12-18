@@ -36,24 +36,28 @@ public class PillarService {
         p1.setStartDate(LocalDate.now());
         p1.setState("active");
         p1.setProject(project);
-        p1.setPriority(3);
         threePillars.add(p1);
 
         Pillar p2 = new Pillar();
-        p2.setName("Commercialization");
+        p2.setName("Relacje");
         p2.setStartDate(LocalDate.now());
         p2.setState("active");
         p2.setProject(project);
-        p2.setPriority(3);
         threePillars.add(p2);
 
         Pillar p3 = new Pillar();
-        p3.setName("Sale");
+        p3.setName("Prawo");
         p3.setStartDate(LocalDate.now());
         p3.setState("active");
         p3.setProject(project);
-        p3.setPriority(3);
         threePillars.add(p3);
+
+        Pillar p4 = new Pillar();
+        p4.setName("INFO");
+        p4.setStartDate(LocalDate.now());
+        p4.setState("active");
+        p4.setProject(project);
+        threePillars.add(p4);
 
         return threePillars;
     }

@@ -126,22 +126,22 @@ public class ProjectService {
 
     private void checkForProjectDuplicates(Project inputProject){
         String inputName = inputProject.getName();
-        String inputPlace = inputProject.getPlace();
-        String inputContractor = inputProject.getContractor();
+        String inputPerson = inputProject.getPersonResponsible();
+        LocalDate inputDeadline = inputProject.getDeadline();
         String inputCompanyResposible = inputProject.getCompanyResposible();
         Integer inputPriority = inputProject.getPriority();
 
-        if(projectRepository.existsByNameAndPlaceAndStateAndContractorAndCompanyResposibleAndPriority(inputName,
-                inputPlace,"active", inputContractor,inputCompanyResposible,inputPriority)){
+        if(projectRepository.existsByNameAndPersonResponsibleAfterAndStateAndDeadlineAndCompanyResposibleAndPriority(inputName,
+                inputPerson,"active", inputDeadline,inputCompanyResposible,inputPriority)){
             throw new IllegalArgumentException("Identical project already exists!");
         }
     }
 
     private void setChangableFields(Project inputProject, Project existingProject){
         existingProject.setName(inputProject.getName());
-        existingProject.setPlace(inputProject.getPlace());
+        existingProject.setDeadline(inputProject.getDeadline());
         existingProject.setPriority(inputProject.getPriority());
-        existingProject.setContractor(inputProject.getContractor());
+        existingProject.setPersonResponsible(inputProject.getPersonResponsible());
         existingProject.setCompanyResposible(inputProject.getCompanyResposible());
     }
 }
