@@ -14,6 +14,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.List;
 import java.util.Set;
 
 @Service
@@ -55,5 +56,18 @@ public class AdminService {
         projectAccessRepository.save(access);
     }
 
-    public void deleteUser(){}
+    @Transactional
+    public User deleteUser(Long userId){
+        User choseUser = userRepository.findById(userId).orElseThrow(
+                ()-> new EntityNotFoundException("User not found!"));
+
+        userRepository.delete(choseUser);
+
+        return choseUser;
+    }
+
+    @Transactional
+    public List<User> getAllUsers(){
+        return userRepository.findAll();
+    }
 }
