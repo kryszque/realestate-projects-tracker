@@ -53,6 +53,8 @@ public class AccessControlService {
     public void checkAccessWithoutProjectId(ProjectPermissions requiredPermission){
         User currentUser = getCurrentUser();
         if(currentUser.getRole() == Role.ADMIN) { }
-
+        else{
+            throw new SecurityException("You don't have permission to perform this action!");
+        }
     }
 }

@@ -62,7 +62,7 @@ public class AdminService {
                         .project(project)
                         .build());
 
-        access.setPermissions(grantedPermissions);
+        access.setPermissions(new HashSet<>(grantedPermissions));
         projectAccessRepository.save(access);
     }
 

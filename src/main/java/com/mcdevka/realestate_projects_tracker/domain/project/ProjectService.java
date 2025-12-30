@@ -78,7 +78,9 @@ public class ProjectService {
 
         setChangableFields(updatedProjectData, existingProject);
 
-        return projectRepository.save(existingProject);
+        projectRepository.save(existingProject);
+        projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
+        return existingProject;
     }
 
     @CheckAccess(ProjectPermissions.CAN_DELETE)
