@@ -4,5 +4,6 @@ public enum ProjectPermissions {
     CAN_VIEW,
     CAN_EDIT,
     CAN_CREATE,
-    CAN_DELETE
+    CAN_DELETE,
+    ADMIN
 }

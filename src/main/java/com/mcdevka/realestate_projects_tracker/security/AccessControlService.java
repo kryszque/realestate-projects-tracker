@@ -52,9 +52,7 @@ public class AccessControlService {
 
     public void checkAccessWithoutProjectId(ProjectPermissions requiredPermission){
         User currentUser = getCurrentUser();
-        if(currentUser.getRole() == Role.ADMIN) {
-            return;
-        }
+        if(currentUser.getRole() == Role.ADMIN) { }
 
     }
 }

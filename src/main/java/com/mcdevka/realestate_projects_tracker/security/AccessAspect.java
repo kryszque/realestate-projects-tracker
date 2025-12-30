@@ -56,6 +56,6 @@ public class AccessAspect {
                 if (args[i] instanceof Long) return (Long) args[i];
             }
         }
-        throw new IllegalStateException("@ProjectId annotation not found and method does not have pram projectId");
+        return null;
     }
 }

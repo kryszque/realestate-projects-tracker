@@ -1,6 +1,8 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
+import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
@@ -25,6 +27,8 @@ public class ProjectService {
     private final PillarService pillarService;
     private final TagRepository tagRepository;
     private final AccessControlService accessControlService;
+    private final ProjectAccessService projectAccessService;
+    private final AdminService adminService;
 
     public List<Project> getAllProjects(){
 
@@ -58,7 +62,11 @@ public class ProjectService {
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
         //TODO provide fields that can NOT be null when creating a createdProject + EXCEPTIONS!!
-        return projectRepository.save(createdProject);
+        Project savedProject = projectRepository.save(createdProject);
+        projectAccessService.assignDefaultPermissionOnProjectCreation(createdProject);
+        adminService.grantSystemAdminAccess(createdProject);
+        return savedProject;
+
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)

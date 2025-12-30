@@ -1,6 +1,13 @@
 package com.mcdevka.realestate_projects_tracker.config;
 
 
+import com.mcdevka.realestate_projects_tracker.domain.project.Project;
+import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.ProjectService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccess;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.user.Role;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserRepository;
@@ -10,12 +17,17 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.Set;
+
 @Component
 @RequiredArgsConstructor
 public class AdminInitializer implements CommandLineRunner {
 
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
+    private final ProjectRepository projectRepository;
+    private final ProjectAccessRepository projectAccessRepository;
 
     @Value("${application.default-admin.firstName}")
     private String adminFirstName;
@@ -40,9 +52,28 @@ public class AdminInitializer implements CommandLineRunner {
                     .company("SYSTEM")
                     .build();
             userRepository.save(admin);
+            grantAdminPermissions();
             System.out.println("Admin has been created");
         }else{
             System.out.println("Admin has already been created");
+            grantAdminPermissions();
+        }
+    }
+
+    private void grantAdminPermissions(){
+        User savedAdmin =  userRepository.findByEmail(adminMail).orElseThrow();
+        List<Project> allProjects = projectRepository.findAll();
+
+        for(Project project : allProjects) {
+            ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(savedAdmin.getId(),
+                            project.getId())
+                    .orElse(ProjectAccess.builder()
+                            .user(savedAdmin)
+                            .project(project)
+                            .build());
+
+            access.setPermissions(Set.of(ProjectPermissions.ADMIN));
+            projectAccessRepository.save(access);
         }
     }
 

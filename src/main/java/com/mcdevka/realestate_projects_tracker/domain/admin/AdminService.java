@@ -6,14 +6,17 @@ import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccess;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserRepository;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
@@ -23,11 +26,18 @@ public class AdminService {
     private final ProjectAccessRepository projectAccessRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
+    private final ProjectAccessService projectAccessService;
+
+    @Value("${application.default-admin.mail}")
+    private String adminMail;
 
     @Transactional
     public void assignUserToCompany(AssignCompanyRequest request, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("User not found!"));
+        String oldCompany = user.getCompany();
         user.setCompany(request.company());
+        projectAccessService.assignDefaultPermissionsOnUserCreation(user);
+        projectAccessService.deleteOldPermissions(userId, oldCompany);
         userRepository.save(user);
     }
 
@@ -52,7 +62,7 @@ public class AdminService {
                         .project(project)
                         .build());
 
-        access.setPermissions(grantedPermissions);;
+        access.setPermissions(grantedPermissions);
         projectAccessRepository.save(access);
     }
 
@@ -69,5 +79,25 @@ public class AdminService {
     @Transactional
     public List<User> getAllUsers(){
         return userRepository.findAll();
+    }
+
+    @Transactional
+    public void grantSystemAdminAccess(Project project) {
+        userRepository.findByEmail(adminMail).ifPresent(admin -> {
+
+            ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(admin.getId(), project.getId())
+                    .orElse(ProjectAccess.builder()
+                            .user(admin)
+                            .project(project)
+                            .permissions(new HashSet<>())
+                            .build());
+
+            Set<ProjectPermissions> newPermissions = new HashSet<>(access.getPermissions());
+            newPermissions.add(ProjectPermissions.ADMIN);
+
+            access.setPermissions(newPermissions);
+
+            projectAccessRepository.save(access);
+        });
     }
 }
