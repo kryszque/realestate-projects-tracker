@@ -1,11 +1,11 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
-import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 
 @RestController
 @RequestMapping("api/projects/{projectId}/pillars/{pillarId}/items")
@@ -112,6 +112,68 @@ public class ItemController {
             return ResponseEntity.ok(history);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{id}/history/{historyId}")
+    public ResponseEntity<ItemHistory> updateItemHistory(@PathVariable Long projectId, @PathVariable Long pillarId , @PathVariable Long id, @PathVariable Long historyId, @RequestBody ItemHistory updatedItemHistoryData) {
+        try {
+            ItemHistory updatedItemHistory = itemService.updateHistoryEntry(projectId, pillarId, id, historyId ,updatedItemHistoryData);
+            return ResponseEntity.ok(updatedItemHistory);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{id}/history/{historyId}/pin")
+    public ResponseEntity<ItemHistory> pinOrUnPinHistory( // <--- Bez Optional
+                                                          @PathVariable Long projectId,
+                                                          @PathVariable Long pillarId,
+                                                          @PathVariable Long id,
+                                                          @PathVariable Long historyId) {
+        try {
+            ItemHistory updatedItemHistory = itemService.pinOrUnPinHistory(projectId, pillarId, id, historyId);
+
+            return ResponseEntity.ok(updatedItemHistory);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/{id}/history/{historyId}/archive")
+    public ResponseEntity<ItemHistory> archiveHistory(
+            @PathVariable Long projectId,
+            @PathVariable Long pillarId,
+            @PathVariable Long id,
+            @PathVariable Long historyId) {
+        try {
+            ItemHistory updatedItemHistory = itemService.archiveHistory(projectId, pillarId, id, historyId);
+
+            return ResponseEntity.ok(updatedItemHistory);
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping("/{id}/history/{historyId}/reactions")
+    public ResponseEntity<ItemHistory> toggleReaction(
+            @PathVariable Long projectId,
+            @PathVariable Long pillarId,
+            @PathVariable Long id,
+            @PathVariable Long historyId,
+            @RequestBody java.util.Map<String, String> payload // Oczekujemy JSON: {"emojiCode": "❤️"}
+    ) {
+        String emoji = payload.get("emojiCode");
+        // Tymczasowo hardcodujemy usera, dopóki nie masz Spring Security
+        String currentUser = "User";
+
+        try {
+            ItemHistory updatedHistory = itemService.toggleReaction(id, historyId, emoji, currentUser);
+            return ResponseEntity.ok(updatedHistory);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.notFound().build();
         }
     }
 }

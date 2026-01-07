@@ -8,6 +8,7 @@ import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.Where;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
@@ -48,6 +49,7 @@ public class Item {
             cascade = CascadeType.ALL,
             orphanRemoval = true
     )
+    @Where(clause = "state != 'archived'")
     private List<ItemHistory> historyEntries = new ArrayList<>();
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })

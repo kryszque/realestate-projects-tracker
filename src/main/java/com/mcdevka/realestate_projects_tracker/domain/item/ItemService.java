@@ -10,8 +10,10 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -60,6 +62,8 @@ public class ItemService {
         checkForItemDuplicates(inputItem.getName(),"active" , inputItem.getCompanyResposible(), inputItem.getPersonResponsible(), pillarId, inputItem.getPriority());
 
         Item createdItem = new Item();
+
+        createdItem.setCompanyResposible(pillar.getCompanyResposible());
 
         setChangableFields(inputItem, createdItem);
         createdItem.setPillar(pillar);
@@ -116,6 +120,14 @@ public class ItemService {
         return itemRepository.save(finishedItem);
     }
 
+    @Transactional(readOnly = true)
+    public Optional<ItemHistory> getItemHistoryById( Long itemId, Long id) {
+        Optional<ItemHistory> itemHistory = Optional.ofNullable(itemRepository.findHistoryByIdAndItemId(itemId, id)
+                .orElseThrow(() -> new IllegalArgumentException("Item with ID " + id + " not found!")));
+
+        return itemHistory;
+    }
+
     @Transactional
     public ItemHistory addHistoryEntry(Long projectId, Long pillarId, Long itemId, ItemHistory itemHistory) {
         Item item = getItemById(projectId, pillarId, itemId);
@@ -123,20 +135,54 @@ public class ItemService {
         ItemHistory historyEntry = new ItemHistory();
 
         historyEntry.setItem(item);
-        historyEntry.setChangeDate(LocalDate.now());
+        historyEntry.setChangeDate(LocalDateTime.now());
         historyEntry.setDescription(itemHistory.getDescription());
         historyEntry.setGoogleFileId(itemHistory.getGoogleFileId());
         historyEntry.setWebViewLink(itemHistory.getWebViewLink());
         historyEntry.setAuthor(itemHistory.getAuthor());
+        historyEntry.setPinned(false);
 
         item.getHistoryEntries().add(historyEntry);
 
         return historyEntry;
     }
 
+    @Transactional
+    public ItemHistory updateHistoryEntry(Long projectId, Long pillarId, Long itemId, Long id, ItemHistory itemHistory) {
+        ItemHistory prevHistory = getItemHistoryById(itemId, id).get();
+
+        prevHistory.setDescription(itemHistory.getDescription());
+        prevHistory.setGoogleFileId(itemHistory.getGoogleFileId());
+        prevHistory.setWebViewLink(itemHistory.getWebViewLink());
+        prevHistory.setAuthor(itemHistory.getAuthor());
+
+        return prevHistory;
+    }
+
+    @Transactional
+    public ItemHistory pinOrUnPinHistory(Long projectId, Long pillarId, Long itemId, Long id) {
+        ItemHistory prevHistory = getItemHistoryById(itemId, id).get();
+
+        if (prevHistory.isPinned()) {
+            prevHistory.setPinned(false);
+        } else {
+            prevHistory.setPinned(true);
+        }
+
+        return prevHistory;
+    }
+
+    @Transactional
+    public ItemHistory archiveHistory(Long projectId, Long pillarId, Long itemId, Long id) {
+        ItemHistory prevHistory = getItemHistoryById(itemId, id).get();
+
+        prevHistory.setState("archived");
+
+        return prevHistory;
+    }
+
     private void setChangableFields(Item inputItem, Item existingItem){
         existingItem.setName(inputItem.getName());
-        existingItem.setCompanyResposible(inputItem.getCompanyResposible());
         existingItem.setPersonResponsible(inputItem.getPersonResponsible());
         existingItem.setPriority(inputItem.getPriority());
         existingItem.setDeadline(inputItem.getDeadline());
@@ -181,5 +227,32 @@ public class ItemService {
         if (itemRepository.existsByNameAndStateAndCompanyResposibleAndPersonResponsibleAndPillarIdAndPriority(name, state, personResponsible, companyResposible, pillarId, priority)) {
             throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
         }
+    }
+
+    @Transactional
+    public ItemHistory toggleReaction(Long itemId, Long historyId, String emoji, String userName) {
+        ItemHistory history = getItemHistoryById(itemId, historyId)
+                .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono wiadomości"));
+
+        Optional<MessageReaction> existingReaction = history.getReactions().stream()
+                .filter(r -> r.getUserName().equals(userName)) // Szukamy po userze, nie po emotce
+                .findFirst();
+
+        if (existingReaction.isPresent()) {
+            MessageReaction reaction = existingReaction.get();
+
+            if (reaction.getEmojiCode().equals(emoji)) {
+                history.getReactions().remove(reaction);
+                reaction.setItemHistory(null);
+            } else {
+                reaction.setEmojiCode(emoji);
+            }
+        } else {
+            MessageReaction newReaction = new MessageReaction(emoji, userName, history);
+            history.getReactions().add(newReaction);
+        }
+
+        return itemRepository.save(history.getItem()).getHistoryEntries()
+                .stream().filter(h -> h.getId().equals(historyId)).findFirst().get();
     }
 }

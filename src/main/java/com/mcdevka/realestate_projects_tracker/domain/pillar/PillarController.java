@@ -1,7 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 
-import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -23,6 +22,17 @@ public class PillarController {
         try {
             List<Pillar> pillars = pillarService.getAllPillarsForAProject(projectId);
             return ResponseEntity.ok(pillars);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @GetMapping("/{pillarId}")
+    public ResponseEntity<Pillar> getPillatById(@PathVariable Long projectId,
+                                                @PathVariable Long pillarId) {
+        try {
+            Pillar pillar = pillarService.getPillarById(projectId, pillarId);
+            return ResponseEntity.ok(pillar);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
