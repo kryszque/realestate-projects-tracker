@@ -39,6 +39,7 @@ public class GlobalSearchingService {
 
     public GlobalSearchingResultDTO searchAndFilter(SearchingCriteria searchCriteria, FilteringCriteria filterCriteria) {
         GlobalSearchingResultDTO rawResults = searchInDatabase(searchCriteria);
+
         return filteringService.filterSearch(rawResults, filterCriteria);
     }
 }

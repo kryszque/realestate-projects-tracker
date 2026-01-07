@@ -1,9 +1,18 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
+import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.domain.user.Role;
+import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
+import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
+import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
@@ -13,28 +22,34 @@ import java.util.List;
 import java.util.Set;
 
 @Service
+@RequiredArgsConstructor
 public class ProjectService {
 
     private final ProjectRepository projectRepository;
     private final PillarService pillarService;
     private final TagRepository tagRepository;
-
-    public ProjectService(ProjectRepository projectRepository, PillarService pillarService, TagRepository tagRepository) {
-        this.projectRepository = projectRepository;
-        this.pillarService = pillarService;
-        this.tagRepository = tagRepository;
-
-    }
+    private final AccessControlService accessControlService;
+    private final ProjectAccessService projectAccessService;
+    private final AdminService adminService;
 
     public List<Project> getAllProjects(){
-        return projectRepository.findByStateNot("archived");
+
+        User currentUser = accessControlService.getCurrentUser();
+
+        if(currentUser.getRole() == Role.ADMIN){
+            return projectRepository.findByStateNot("archived");
+        }else{
+            return projectRepository.findByStateNotAndCompanyResposible("archived", currentUser.getCompany());
+        }
     }
 
-    public Project getProjectById(Long id){
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
+    public Project getProjectById(@ProjectId Long id){
         return projectRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + id + " not found!"));
     }
 
+    @CheckAccess(ProjectPermissions.CAN_CREATE)
     public Project createProject(Project inputProject){
 
         checkForProjectDuplicates(inputProject);
@@ -61,10 +76,15 @@ public class ProjectService {
         }
 
         //TODO provide fields that can NOT be null when creating a createdProject + EXCEPTIONS!!
-        return projectRepository.save(createdProject);
+        Project savedProject = projectRepository.save(createdProject);
+        projectAccessService.assignDefaultPermissionOnProjectCreation(createdProject);
+        adminService.grantSystemAdminAccess(createdProject);
+        return savedProject;
+
     }
 
-    public Project updateProjectInfo(Long id, Project updatedProjectData) {
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Project updateProjectInfo(@ProjectId Long id, Project updatedProjectData) {
 
         Project existingProject = getProjectById(id);
 
@@ -84,22 +104,27 @@ public class ProjectService {
             existingProject.setTags(updatedTags);
         }
 
-        return projectRepository.save(existingProject);
+        projectRepository.save(existingProject);
+        projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
+        return existingProject;
     }
 
-    public Project archiveProject(Long id){
+    @CheckAccess(ProjectPermissions.CAN_DELETE)
+    public Project archiveProject(@ProjectId Long id){
         Project archivedProject = getProjectById(id);
         archivedProject.setState("archived");
         return projectRepository.save(archivedProject);
     }
 
-    public Project finishProject(Long id){
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Project finishProject(@ProjectId Long id){
         Project finishedProject = getProjectById(id);
         finishedProject.setState("finished");
         return projectRepository.save(finishedProject);
     }
 
-    public Project addTagToProject(Long projectId, Long tagId) {
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Project addTagToProject(@ProjectId Long projectId, Long tagId) {
         Project project = getProjectById(projectId);
 
         Tag tag = tagRepository.findById(tagId)
@@ -109,7 +134,8 @@ public class ProjectService {
         return projectRepository.save(project);
     }
 
-    public Project removeTagFromProject(Long projectId, Long tagId) {
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Project removeTagFromProject(@ProjectId Long projectId, Long tagId) {
         Project project = getProjectById(projectId);
 
         Tag tag = tagRepository.findById(tagId)

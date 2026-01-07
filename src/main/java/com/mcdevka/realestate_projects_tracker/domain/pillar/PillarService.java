@@ -3,8 +3,12 @@ package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
+import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
+import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
@@ -66,7 +70,8 @@ public class PillarService {
         return threePillars;
     }
 
-    public Pillar getPillarById(Long projectId, Long id){
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
+    public Pillar getPillarById(@ProjectId Long projectId, Long id){
         Pillar pillar = pillarRepository.findByIdAndStateNot(id, "archived")
                 .orElseThrow(() -> new IllegalArgumentException("Pillar with id " + id + " not found!"));
         if (!pillar.getProject().getId().equals(projectId)) {
@@ -75,13 +80,15 @@ public class PillarService {
         return pillar;
     }
 
-    public List<Pillar> getAllPillarsForAProject(Long projectId){
+    @CheckAccess(ProjectPermissions.CAN_VIEW)
+    public List<Pillar> getAllPillarsForAProject(@ProjectId Long projectId){
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
         return project.getPillars();
     }
 
-    public Pillar createPillar(Long projectId, Pillar inputPillar){
+    @CheckAccess(ProjectPermissions.CAN_CREATE)
+    public Pillar createPillar(@ProjectId Long projectId, Pillar inputPillar){
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
@@ -119,7 +126,8 @@ public class PillarService {
         return pillarRepository.save(newPillar);
     }
 
-    public Pillar updatePillarInfo(Long projectId, Long pillarId, Pillar inputPillar){
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Pillar updatePillarInfo(@ProjectId Long projectId, Long pillarId, Pillar inputPillar){
         projectRepository.findById(projectId)
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + projectId + " not found!"));
 
@@ -147,20 +155,22 @@ public class PillarService {
         return pillarRepository.save(updatedPillar);
     }
 
-
-    public Pillar archivePillar(Long projectId, Long pillarId){
+    @CheckAccess(ProjectPermissions.CAN_DELETE)
+    public Pillar archivePillar(@ProjectId Long projectId, Long pillarId){
         Pillar archivedPillar = validateProjectId(projectId, pillarId);
         archivedPillar.setState("archived");
         return pillarRepository.save(archivedPillar);
     }
 
-    public Pillar finishPillar(Long projectId, Long pillarId){
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Pillar finishPillar(@ProjectId Long projectId, Long pillarId){
         Pillar finishedPillar = validateProjectId(projectId, pillarId);
         finishedPillar.setState("finished");
         return pillarRepository.save(finishedPillar);
     }
 
-    public Pillar addTagToPillar(Long projectId, Long pillarId, Long tagId){
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Pillar addTagToPillar(@ProjectId Long projectId, Long pillarId, Long tagId){
         Pillar pillar = getPillarById(projectId, pillarId);
 
         Tag tag = tagRepository.findById(tagId)
@@ -170,7 +180,8 @@ public class PillarService {
         return pillarRepository.save(pillar);
     }
 
-    public Pillar removeTagFromPillar(Long projectId, Long pillarId, Long tagId){
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Pillar removeTagFromPillar(@ProjectId Long projectId, Long pillarId, Long tagId){
         Pillar pillar = getPillarById(projectId, pillarId);
 
         Tag tag = tagRepository.findById(tagId)

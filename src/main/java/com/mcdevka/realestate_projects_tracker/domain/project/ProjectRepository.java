@@ -17,4 +17,5 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
                                                                                      String companyResposible,
                                                                                      Integer priority);
     List<Project> findByStateNot(String state);
+    List<Project> findByStateNotAndCompanyResposible(String state, String companyResposible);
 }
