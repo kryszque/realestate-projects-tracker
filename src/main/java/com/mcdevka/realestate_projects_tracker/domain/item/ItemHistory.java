@@ -1,9 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.*;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -18,7 +15,7 @@ import java.util.ArrayList;
 @Setter
 @NoArgsConstructor
 @Entity
-@ToString(exclude = {"item"})
+@ToString(exclude = {"item", "replyTo"})
 @Table(name = "item_history")
 public class ItemHistory {
     @Id
@@ -43,6 +40,16 @@ public class ItemHistory {
     private java.util.List<MessageReaction> reactions = new java.util.ArrayList<>();
 
     private String state = "active";
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "reply_to_id")
+    @JsonIgnoreProperties({"hibernateLazyInitializer", "handler"})
+    @JsonIncludeProperties({"id", "author", "description"})
+    private ItemHistory replyTo;
+
+    @Transient // To pole służy tylko do odebrania ID z frontendu
+    @JsonProperty("replyToId")
+    private Long replyToId;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "item_id", nullable = false)

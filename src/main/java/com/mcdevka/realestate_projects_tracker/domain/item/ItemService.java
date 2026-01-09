@@ -152,9 +152,25 @@ public class ItemService {
         historyEntry.setWebViewLink(itemHistory.getWebViewLink());
         historyEntry.setAuthor(itemHistory.getAuthor());
         historyEntry.setPinned(false);
+        historyEntry.setState("active");
+
+        // 👇 WYKORZYSTUJEMY TWOJĄ ISTNIEJĄCĄ LOGIKĘ:
+        if (itemHistory.getReplyToId() != null) {
+            // 1. Pobierasz LICZBĘ (Long) z obiektu, który przyszedł z frontendu
+            Long idZFrontendu = itemHistory.getReplyToId();
+
+            // 2. Zamieniasz tę LICZBĘ na OBIEKT, używając Twojej metody
+            ItemHistory obiektWiadomosci = getItemHistoryById(itemId, idZFrontendu)
+                    .orElseThrow(() -> new IllegalArgumentException("Nie ma takiej wiadomości!"));
+
+            // 3. Przypisujesz OBIEKT do nowej wiadomości
+            historyEntry.setReplyTo(obiektWiadomosci);
+        }
 
         item.getHistoryEntries().add(historyEntry);
 
+        // Ponieważ metoda jest @Transactional, a 'item' jest zarządzany (managed),
+        // nowa wiadomość zostanie zapisana w bazie automatycznie przy wyjściu z metody.
         return historyEntry;
     }
 
@@ -166,6 +182,17 @@ public class ItemService {
         prevHistory.setGoogleFileId(itemHistory.getGoogleFileId());
         prevHistory.setWebViewLink(itemHistory.getWebViewLink());
         prevHistory.setAuthor(itemHistory.getAuthor());
+
+        if (itemHistory.getReplyToId() != null) {
+            // Szukamy nowej wiadomości-matki po ID (Long -> ItemHistory)
+            ItemHistory newReplyTo = getItemHistoryById(itemId, itemHistory.getReplyToId())
+                    .orElseThrow(() -> new IllegalArgumentException("Nie znaleziono wiadomości bazowej o ID: " + itemHistory.getReplyToId()));
+
+            prevHistory.setReplyTo(newReplyTo);
+        } else {
+            // Jeśli z frontendu przyszło null w replyToId, usuwamy powiązanie
+            prevHistory.setReplyTo(null);
+        }
 
         return prevHistory;
     }
