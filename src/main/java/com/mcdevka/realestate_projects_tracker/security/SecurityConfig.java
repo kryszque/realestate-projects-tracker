@@ -4,6 +4,7 @@ import com.mcdevka.realestate_projects_tracker.security.jwt.JwtAuthenticationFil
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
@@ -30,7 +31,21 @@ public class SecurityConfig {
             .csrf(csrf -> csrf.disable())
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
+
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/projects/**")
+                            .hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/tags/**")
+                            .hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers("/api/tags/**").hasAuthority("ADMIN")
+
+                        .requestMatchers(HttpMethod.GET, "/api/projects/{id}/pillars/**")
+                            .hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers("/api/projects/{id}/pillars").hasAuthority("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
@@ -46,7 +61,10 @@ public class SecurityConfig {
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
 
-        configuration.setAllowedOrigins(List.of("http://localhost:5173"));
+        configuration.setAllowedOrigins(List.of(
+                "http://localhost:5173",  // React Dev (npm run dev)
+                "http://localhost"        // Docker Frontend (port 80)
+        ));
 
         configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
 
