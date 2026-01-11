@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.company.CompanyRepository;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
@@ -32,6 +33,7 @@ public class ProjectService {
     private final AccessControlService accessControlService;
     private final ProjectAccessService projectAccessService;
     private final AdminService adminService;
+    private final CompanyRepository companyRepository;
 
     public List<Project> getAllProjects(){
 
@@ -64,6 +66,12 @@ public class ProjectService {
         createdProject.setPriority(inputProject.getPriority());
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
+        if (inputProject.getCompanyResposible() != null && inputProject.getCompanyResposible().getId() != null) {
+            Company company = companyRepository.findById(inputProject.getCompanyResposible().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Company not found with ID: " + inputProject.getCompanyResposible().getId()));
+            createdProject.setCompanyResposible(company);
+        }
+
         if (inputProject.getTags() != null && !inputProject.getTags().isEmpty()) {
             Set<Tag> tagsToAdd = new HashSet<>();
 
@@ -91,6 +99,14 @@ public class ProjectService {
 
         setChangableFields(updatedProjectData, existingProject);
 
+        if (updatedProjectData.getCompanyResposible() != null && updatedProjectData.getCompanyResposible().getId() != null) {
+            Company company = companyRepository.findById(updatedProjectData.getCompanyResposible().getId())
+                    .orElseThrow(() -> new IllegalArgumentException("Company not found"));
+            existingProject.setCompanyResposible(company);
+        } else {
+            existingProject.setCompanyResposible(null);
+        }
+
         if (updatedProjectData.getTags() != null) {
             Set<Tag> updatedTags = new HashSet<>();
 
@@ -106,7 +122,7 @@ public class ProjectService {
         }
 
         projectRepository.save(existingProject);
-        projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
+        //projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
         return existingProject;
     }
 
@@ -169,6 +185,5 @@ public class ProjectService {
         existingProject.setDeadline(inputProject.getDeadline());
         existingProject.setPriority(inputProject.getPriority());
         existingProject.setPersonResponsible(inputProject.getPersonResponsible());
-        existingProject.setCompanyResposible(inputProject.getCompanyResposible());
     }
 }
