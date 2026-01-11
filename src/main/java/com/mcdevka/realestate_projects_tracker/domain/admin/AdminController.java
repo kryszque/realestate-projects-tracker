@@ -20,11 +20,23 @@ public class AdminController {
     private final AdminService adminService;
     private final UserService userService;
 
-    @PostMapping("/users/{userId}/company")
-    public ResponseEntity<Void> assignUserToCompany(@PathVariable long userId,
+    @PostMapping("/users/{userId}/company/add")
+    public ResponseEntity<Void> addCompanyToUser(@PathVariable long userId,
                                                     @RequestBody AssignCompanyRequest request){
         try{
-            adminService.assignUserToCompany(request, userId);
+            adminService.addCompanyToUser(request, userId);
+            return ResponseEntity.ok().build();
+        }
+        catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PostMapping("/users/{userId}/company/delete")
+    public ResponseEntity<Void> deleteCompanyFromUser(@PathVariable long userId,
+                                                 @RequestBody AssignCompanyRequest request){
+        try{
+            adminService.deleteCompanyFromUser(request, userId);
             return ResponseEntity.ok().build();
         }
         catch (IllegalArgumentException e){

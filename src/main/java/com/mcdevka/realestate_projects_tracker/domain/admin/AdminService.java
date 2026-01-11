@@ -2,6 +2,8 @@ package com.mcdevka.realestate_projects_tracker.domain.admin;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.AssignCompanyRequest;
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.GrantPermissionsRequest;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.company.CompanyRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccess;
@@ -27,17 +29,30 @@ public class AdminService {
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
     private final ProjectAccessService projectAccessService;
+    private final CompanyRepository companyRepository;
 
     @Value("${application.default-admin.mail}")
     private String adminMail;
 
     @Transactional
-    public void assignUserToCompany(AssignCompanyRequest request, Long userId) {
+    public void addCompanyToUser(AssignCompanyRequest request, Long userId) {
         User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("User not found!"));
-        String oldCompany = user.getCompany();
-        user.setCompany(request.company());
+        Company company = companyRepository.findById(request.company().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Company not found!"));
+        user.getCompanies().add(company);
         projectAccessService.assignDefaultPermissionsOnUserCreation(user);
-        projectAccessService.deleteOldPermissions(userId, oldCompany);
+        userRepository.save(user);
+    }
+
+    @Transactional
+    public void deleteCompanyFromUser(AssignCompanyRequest request, Long userId) {
+        User user = userRepository.findById(userId).orElseThrow(()-> new EntityNotFoundException("User not found!"));
+        Company companyToRemove = user.getCompanies().stream()
+                .filter(c -> c.getId().equals(request.company().getId()))
+                .findFirst()
+                .orElseThrow(() -> new EntityNotFoundException("User does not belong to this company!"));
+        user.getCompanies().remove(companyToRemove);
+        projectAccessService.deleteOldPermissions(userId, companyToRemove);
         userRepository.save(user);
     }
 
@@ -51,7 +66,7 @@ public class AdminService {
         Project project = projectRepository.findById(request.projectId())
                                             .orElseThrow(()-> new EntityNotFoundException("Project not found!"));
 
-        if (user.getCompany() == null || !user.getCompany().equals(project.getCompanyResposible())) {
+        if (user.getCompanies() == null || !user.getCompanies().contains(project.getCompanyResposible())) {
             throw new IllegalStateException("User: " + user.getId() + " does not belong to the company: "
             + project.getCompanyResposible() + " with project: " + project.getName());
         }

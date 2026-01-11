@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.project.access;
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
@@ -36,8 +37,8 @@ public class ProjectAccessService {
     }
 
     public void assignDefaultPermissionOnProjectCreation(Project project){
-        String companyResponsible = project.getCompanyResposible();
-        List<User> users = userRepository.findByCompany(companyResponsible);
+        Company companyResponsible = project.getCompanyResposible();
+        List<User> users = userRepository.findByCompaniesContaining(companyResponsible);
         for(User user : users){
             ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(user.getId(), project.getId())
                     .orElse(ProjectAccess.builder()
@@ -51,8 +52,8 @@ public class ProjectAccessService {
     }
 
     public void assignDefaultPermissionsOnUserCreation(User user){
-        String company = user.getCompany();
-        List<Project> projects = projectRepository.findByStateNotAndCompanyResposible("archived", company);
+        Set<Company> companies = user.getCompanies();
+        List<Project> projects = projectRepository.findByStateNotAndCompanyResposibleIn("archived", companies);
         for(Project project : projects){
             ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(user.getId(), project.getId())
                     .orElse(ProjectAccess.builder()
@@ -65,8 +66,8 @@ public class ProjectAccessService {
         }
     }
 
-    public void deleteOldPermissions(Long userId, String oldCompany){
-        List<Project> projects = projectRepository.findByStateNotAndCompanyResposible("archived", oldCompany);
+    public void deleteOldPermissions(Long userId, Company oldCompany){
+        List<Project> projects = projectRepository.findByStateNotAndCompanyResposibleIn("archived", Set.of(oldCompany));
         for(Project project : projects){
             projectAccessRepository.deleteByUserIdAndProjectId(userId, project.getId());
         }

@@ -36,7 +36,7 @@ public class PillarService {
     public List<Pillar> initializeDefaultPillars(Project project){
         List<Pillar> threePillars = new ArrayList<>();
         Pillar p1 = new Pillar();
-        p1.setCompanyResposible(project.getCompanyResposible());
+        p1.setCompanyResposible(project.getCompanyResposible().getName());
         p1.setName("Design");
         p1.setStartDate(LocalDate.now());
         p1.setState("active");
@@ -44,7 +44,7 @@ public class PillarService {
         threePillars.add(p1);
 
         Pillar p2 = new Pillar();
-        p2.setCompanyResposible(project.getCompanyResposible());
+        p2.setCompanyResposible(project.getCompanyResposible().getName());
         p2.setName("Relacje");
         p2.setStartDate(LocalDate.now());
         p2.setState("active");
@@ -52,7 +52,7 @@ public class PillarService {
         threePillars.add(p2);
 
         Pillar p3 = new Pillar();
-        p3.setCompanyResposible(project.getCompanyResposible());
+        p3.setCompanyResposible(project.getCompanyResposible().getName());
         p3.setName("Prawo");
         p3.setStartDate(LocalDate.now());
         p3.setState("active");
@@ -60,7 +60,7 @@ public class PillarService {
         threePillars.add(p3);
 
         Pillar p4 = new Pillar();
-        p4.setCompanyResposible(project.getCompanyResposible());
+        p4.setCompanyResposible(project.getCompanyResposible().getName());
         p4.setName("INFO");
         p4.setStartDate(LocalDate.now());
         p4.setState("active");
@@ -95,7 +95,7 @@ public class PillarService {
         String inputName = inputPillar.getName();
         Integer inputPriority = inputPillar.getPriority();
         LocalDate inputDeadline = inputPillar.getDeadline();
-        String inputCompany = project.getCompanyResposible();
+        String inputCompany = project.getCompanyResposible().getName();
 
         if(pillarRepository.existsByNameAndStateAndProjectIdAndPriority(inputName, "active",  projectId, inputPriority)){
             throw new  IllegalArgumentException("Pillar with name " + inputName + " already exists in " +

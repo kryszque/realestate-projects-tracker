@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
@@ -39,7 +40,7 @@ public class ProjectService {
         if(currentUser.getRole() == Role.ADMIN){
             return projectRepository.findByStateNot("archived");
         }else{
-            return projectRepository.findByStateNotAndCompanyResposible("archived", currentUser.getCompany());
+            return projectRepository.findByStateNotAndCompanyResposibleIn("archived", currentUser.getCompanies());
         }
     }
 
@@ -154,7 +155,7 @@ public class ProjectService {
         String inputName = inputProject.getName();
         String inputPerson = inputProject.getPersonResponsible();
         LocalDate inputDeadline = inputProject.getDeadline();
-        String inputCompanyResposible = inputProject.getCompanyResposible();
+        Company inputCompanyResposible = inputProject.getCompanyResposible();
         Integer inputPriority = inputProject.getPriority();
 
         if(projectRepository.existsByNameAndPersonResponsibleAndStateAndDeadlineAndCompanyResposibleAndPriority(inputName,

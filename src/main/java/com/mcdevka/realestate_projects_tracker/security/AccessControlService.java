@@ -30,14 +30,14 @@ public class AccessControlService {
         if(currentUser.getRole() == Role.ADMIN) {
             return;
         }
-        if(currentUser.getCompany() == null){
+        if(currentUser.getCompanies() == null){
             throw new SecurityException("You are not assigned to any company!");
         }
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new SecurityException("Project with id " + projectId + " does not exist!"));
 
-        if(!currentUser.getCompany().equals(project.getCompanyResposible())){
+        if(!currentUser.getCompanies().contains(project.getCompanyResposible())){
             throw new SecurityException("This project isn't assigned to your company!");
         }
 

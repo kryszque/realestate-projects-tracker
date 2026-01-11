@@ -1,5 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.user;
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,7 +9,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name ="users")
@@ -27,7 +31,15 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private String company;
+
+    @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
+    @JoinTable(
+            name = "user_companies",
+            joinColumns = @JoinColumn(name = "user_id"),
+            inverseJoinColumns = @JoinColumn(name = "company_id")
+    )
+    @ToString.Exclude
+    private Set<Company> companies = new HashSet<>();
 
 
     @Override

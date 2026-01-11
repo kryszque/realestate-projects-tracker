@@ -31,7 +31,7 @@ public class UserService {
                 .toList();
 
         return new UserDetail(user.getId(), user.getEmail(), user.getFirstname(),
-                user.getLastname(), user.getRole().name(), user.getCompany(), projects);
+                user.getLastname(), user.getRole().name(), user.getCompanies(), projects);
     }
 
 

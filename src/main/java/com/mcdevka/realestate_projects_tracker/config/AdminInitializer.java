@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.config;
 
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectService;
@@ -41,7 +42,8 @@ public class AdminInitializer implements CommandLineRunner {
     @Override
     public void run(String... args) throws Exception {
         if(userRepository.findByEmail(adminMail).isEmpty()) {
-
+            Company adminCompany = new Company();
+            adminCompany.setName("System");
             String encodedPassword = passwordEncoder.encode(adminPassword);
             User admin =User.builder()
                     .firstname(adminFirstName)
@@ -49,7 +51,7 @@ public class AdminInitializer implements CommandLineRunner {
                     .email(adminMail)
                     .password(encodedPassword)
                     .role(Role.ADMIN)
-                    .company("SYSTEM")
+                    .companies(Set.of(adminCompany))
                     .build();
             userRepository.save(admin);
             grantAdminPermissions();

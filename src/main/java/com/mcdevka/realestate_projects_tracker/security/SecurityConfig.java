@@ -46,6 +46,10 @@ public class SecurityConfig {
                             .hasAnyAuthority("USER", "ADMIN")
                         .requestMatchers("/api/projects/{id}/pillars").hasAuthority("ADMIN")
 
+                        .requestMatchers(HttpMethod.GET, "/api/company/**")
+                            .hasAnyAuthority("USER", "ADMIN")
+                        .requestMatchers("/api/company/**").hasAnyAuthority("ADMIN")
+
                         .anyRequest().authenticated()
                 )
                 .sessionManagement(session -> session
