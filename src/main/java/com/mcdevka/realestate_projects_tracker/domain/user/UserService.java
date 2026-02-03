@@ -1,7 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.user;
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectService;
-import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserDetail;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserProject;
@@ -25,14 +25,26 @@ public class UserService {
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new EntityNotFoundException("User not found!"));
 
+        // Pobieramy projekty (logika bez zmian)
         List<UserProject> projects = projectService.getAllProjects().stream()
                 .map(project -> projectAccessService.getUserProject(userId, project.getId()))
                 .filter(Objects::nonNull)
                 .toList();
 
-        return new UserDetail(user.getId(), user.getEmail(), user.getFirstname(),
-                user.getLastname(), user.getRole().name(), user.getCompany(), projects);
+        // ZMIANA: Mapujemy Set<Company> na List<String> (nazwy firm)
+        List<String> companyNames = user.getCompanies().stream()
+                .map(Company::getName)
+                .collect(Collectors.toList());
+
+        // Przekazujemy listę nazw firm do DTO
+        return new UserDetail(
+                user.getId(),
+                user.getEmail(),
+                user.getFirstname(),
+                user.getLastname(),
+                user.getRole().name(),
+                companyNames, // <--- Tutaj przekazujemy listę zamiast pojedynczego stringa
+                projects
+        );
     }
-
-
 }

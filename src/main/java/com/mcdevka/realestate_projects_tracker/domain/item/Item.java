@@ -1,9 +1,8 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import jakarta.persistence.*;
@@ -32,7 +31,10 @@ public class Item {
     @Column(nullable = false)
     private String name;
     private String state = "active";
-    private String companyResposible;
+
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
     private String personResponsible;
 
     @Column(nullable = false, updatable = false)

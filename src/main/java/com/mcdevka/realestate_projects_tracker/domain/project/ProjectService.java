@@ -1,6 +1,9 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.item.ItemRepository;
+import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccessService;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
@@ -12,14 +15,13 @@ import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Service
 @RequiredArgsConstructor
@@ -31,15 +33,22 @@ public class ProjectService {
     private final AccessControlService accessControlService;
     private final ProjectAccessService projectAccessService;
     private final AdminService adminService;
+    private final PillarRepository pillarRepository;
+    private final ItemRepository itemRepository;
 
     public List<Project> getAllProjects(){
-
         User currentUser = accessControlService.getCurrentUser();
 
         if(currentUser.getRole() == Role.ADMIN){
             return projectRepository.findByStateNot("archived");
-        }else{
-            return projectRepository.findByStateNotAndCompanyResposible("archived", currentUser.getCompany());
+        } else {
+            Collection<Company> userCompanies = currentUser.getCompanies();
+
+            if (userCompanies.isEmpty()) {
+                return List.of();
+            }
+
+            return projectRepository.findByStateNotAndCompanyIn("archived", userCompanies);
         }
     }
 
@@ -75,20 +84,23 @@ public class ProjectService {
             createdProject.setTags(tagsToAdd);
         }
 
-        //TODO provide fields that can NOT be null when creating a createdProject + EXCEPTIONS!!
         Project savedProject = projectRepository.save(createdProject);
         projectAccessService.assignDefaultPermissionOnProjectCreation(createdProject);
         adminService.grantSystemAdminAccess(createdProject);
         return savedProject;
-
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)
+    @Transactional
     public Project updateProjectInfo(@ProjectId Long id, Project updatedProjectData) {
 
         Project existingProject = getProjectById(id);
 
+        Company oldCompany = existingProject.getCompany();
+
         setChangableFields(updatedProjectData, existingProject);
+
+        Company newCompany = existingProject.getCompany();
 
         if (updatedProjectData.getTags() != null) {
             Set<Tag> updatedTags = new HashSet<>();
@@ -100,13 +112,18 @@ public class ProjectService {
                     updatedTags.add(tag);
                 }
             }
-
             existingProject.setTags(updatedTags);
         }
 
-        projectRepository.save(existingProject);
+        Project savedProject = projectRepository.save(existingProject);
+
+        if (!Objects.equals(oldCompany, newCompany)) {
+            pillarRepository.updateCompanyForProject(id, newCompany);
+            itemRepository.updateCompanyForProject(id, newCompany);
+        }
+
         projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
-        return existingProject;
+        return savedProject;
     }
 
     @CheckAccess(ProjectPermissions.CAN_DELETE)
@@ -154,11 +171,11 @@ public class ProjectService {
         String inputName = inputProject.getName();
         String inputPerson = inputProject.getPersonResponsible();
         LocalDate inputDeadline = inputProject.getDeadline();
-        String inputCompanyResposible = inputProject.getCompanyResposible();
+        Company inputCompany = inputProject.getCompany();
         Integer inputPriority = inputProject.getPriority();
 
-        if(projectRepository.existsByNameAndPersonResponsibleAndStateAndDeadlineAndCompanyResposibleAndPriority(inputName,
-                inputPerson,"active", inputDeadline,inputCompanyResposible,inputPriority)){
+        if(projectRepository.existsByNameAndPersonResponsibleAndStateAndDeadlineAndCompanyAndPriority(inputName,
+                inputPerson,"active", inputDeadline,inputCompany,inputPriority)){
             throw new IllegalArgumentException("Identical project already exists!");
         }
     }
@@ -168,6 +185,6 @@ public class ProjectService {
         existingProject.setDeadline(inputProject.getDeadline());
         existingProject.setPriority(inputProject.getPriority());
         existingProject.setPersonResponsible(inputProject.getPersonResponsible());
-        existingProject.setCompanyResposible(inputProject.getCompanyResposible());
+        existingProject.setCompany(inputProject.getCompany());
     }
 }

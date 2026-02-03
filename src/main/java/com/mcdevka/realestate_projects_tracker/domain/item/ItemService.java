@@ -1,20 +1,18 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
-import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
-import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.stereotype.Service;
 
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.HashSet;
 import java.util.List;
@@ -67,11 +65,11 @@ public class ItemService {
     public Item createItem(@ProjectId Long projectId, Long pillarId, Item inputItem) {
         Pillar pillar = validatePillarPath(projectId, pillarId);
 
-        checkForItemDuplicates(inputItem.getName(),"active" , inputItem.getCompanyResposible(), inputItem.getPersonResponsible(), pillarId, inputItem.getPriority());
+        checkForItemDuplicates(inputItem.getName(),"active" , inputItem.getCompany(), inputItem.getPersonResponsible(), pillarId, inputItem.getPriority());
 
         Item createdItem = new Item();
 
-        createdItem.setCompanyResposible(pillar.getCompanyResposible());
+        createdItem.setCompany(pillar.getCompany());
 
         setChangableFields(inputItem, createdItem);
         createdItem.setPillar(pillar);
@@ -182,6 +180,7 @@ public class ItemService {
         prevHistory.setGoogleFileId(itemHistory.getGoogleFileId());
         prevHistory.setWebViewLink(itemHistory.getWebViewLink());
         prevHistory.setAuthor(itemHistory.getAuthor());
+        prevHistory.setEdited(true);
 
         if (itemHistory.getReplyToId() != null) {
             // Szukamy nowej wiadomości-matki po ID (Long -> ItemHistory)
@@ -263,8 +262,8 @@ public class ItemService {
         return itemRepository.findAll(spec);
     }
 
-    private void checkForItemDuplicates(String name, String state, String personResponsible, String companyResposible, Long pillarId, Integer priority) {
-        if (itemRepository.existsByNameAndStateAndCompanyResposibleAndPersonResponsibleAndPillarIdAndPriority(name, state, personResponsible, companyResposible, pillarId, priority)) {
+    private void checkForItemDuplicates(String name, String state, Company personResponsible, String companyResposible, Long pillarId, Integer priority) {
+        if (itemRepository.existsByNameAndStateAndCompanyAndPersonResponsibleAndPillarIdAndPriority(name, state, personResponsible, companyResposible, pillarId, priority)) {
             throw new IllegalArgumentException("Item with name '" + name + "' already exists in this pillar!");
         }
     }

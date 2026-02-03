@@ -1,7 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import jakarta.persistence.*;
 import lombok.NoArgsConstructor;
@@ -34,7 +34,9 @@ public class Project {
 
     private String personResponsible;
 
-    private String companyResposible;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     @ManyToMany(cascade = { CascadeType.PERSIST, CascadeType.MERGE })
     @JoinTable(

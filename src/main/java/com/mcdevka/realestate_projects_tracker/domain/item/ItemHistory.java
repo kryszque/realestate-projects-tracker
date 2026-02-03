@@ -33,6 +33,8 @@ public class ItemHistory {
 
     private String author;
 
+    private boolean edited;
+
     @JsonProperty("isPinned")
     private boolean isPinned = false;
 

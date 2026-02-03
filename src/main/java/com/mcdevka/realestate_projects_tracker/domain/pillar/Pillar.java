@@ -1,8 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.item.Item;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
@@ -30,7 +29,9 @@ public class Pillar {
 
     private LocalDate deadline;
 
-    private String companyResposible;
+    @ManyToOne
+    @JoinColumn(name = "company_id")
+    private Company company;
 
     private String name;
     private LocalDate startDate;

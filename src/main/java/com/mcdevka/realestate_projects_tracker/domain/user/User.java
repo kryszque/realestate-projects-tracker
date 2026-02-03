@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.user;
 
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
 import org.springframework.security.core.GrantedAuthority;
@@ -7,7 +8,9 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name ="users")
@@ -27,8 +30,14 @@ public class User implements UserDetails {
     private String password;
     @Enumerated(EnumType.STRING)
     private Role role;
-    private String company;
 
+    @ManyToMany(fetch = FetchType.EAGER) // EAGER: pobierz firmy od razu przy pobieraniu usera (przydatne przy logowaniu)
+    @JoinTable(
+            name = "user_companies",               // Nazwa tabeli łączącej w bazie
+            joinColumns = @JoinColumn(name = "user_id"),         // Klucz usera
+            inverseJoinColumns = @JoinColumn(name = "company_id") // Klucz firmy
+    )
+    private Set<Company> companies = new HashSet<>();
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

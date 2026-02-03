@@ -1,6 +1,5 @@
 package com.mcdevka.realestate_projects_tracker.domain.searching;
 
-import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import lombok.Data;
 
 import java.util.List;

@@ -1,6 +1,5 @@
 package com.mcdevka.realestate_projects_tracker.security;
 
-
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAccess;
@@ -16,6 +15,7 @@ import org.springframework.stereotype.Service;
 @Service
 @RequiredArgsConstructor
 public class AccessControlService {
+
     private final ProjectRepository projectRepository;
     private final ProjectAccessRepository projectAccessRepository;
 
@@ -30,31 +30,31 @@ public class AccessControlService {
         if(currentUser.getRole() == Role.ADMIN) {
             return;
         }
-        if(currentUser.getCompany() == null){
+
+        if(currentUser.getCompanies() == null || currentUser.getCompanies().isEmpty()){
             throw new SecurityException("You are not assigned to any company!");
         }
 
         Project project = projectRepository.findById(projectId)
                 .orElseThrow(() -> new SecurityException("Project with id " + projectId + " does not exist!"));
 
-        if(!currentUser.getCompany().equals(project.getCompanyResposible())){
-            throw new SecurityException("This project isn't assigned to your company!");
+        if(!currentUser.getCompanies().contains(project.getCompany())){
+            throw new SecurityException("This project isn't assigned to any of your companies!");
         }
 
         ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(currentUser.getId(),
-                projectId).orElseThrow(() -> new SecurityException("You don't have access to do this project!"));
+                projectId).orElseThrow(() -> new SecurityException("You don't have access to this project!"));
 
         if(!access.getPermissions().contains(requiredPermission)){
             throw new SecurityException("You don't have permission to do this action! You need " + requiredPermission);
         }
-
     }
 
     public void checkAccessWithoutProjectId(ProjectPermissions requiredPermission){
         User currentUser = getCurrentUser();
-        if(currentUser.getRole() == Role.ADMIN) { }
-        else{
-            throw new SecurityException("You don't have permission to perform this action!");
+        if(currentUser.getRole() == Role.ADMIN) {
+            return;
         }
+        throw new SecurityException("You don't have permission to perform this action!");
     }
 }
