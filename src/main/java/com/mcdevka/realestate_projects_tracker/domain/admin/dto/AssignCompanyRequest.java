@@ -1,3 +1,10 @@
 package com.mcdevka.realestate_projects_tracker.domain.admin.dto;
 
-public record AssignCompanyRequest(Long companyId) {}
+import lombok.Data;
+import java.util.List;
+
+@Data
+public class AssignCompanyRequest {
+    // 👇 Zmieniamy z String companyName na listę ID
+    private List<Long> companyIds;
+}

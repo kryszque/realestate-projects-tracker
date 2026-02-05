@@ -5,6 +5,7 @@ import com.mcdevka.realestate_projects_tracker.domain.admin.dto.GrantPermissions
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserService;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserDetail;
+import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,13 +23,16 @@ public class AdminController {
 
     @PostMapping("/users/{userId}/company")
     public ResponseEntity<Void> assignUserToCompany(@PathVariable long userId,
-                                                    @RequestBody AssignCompanyRequest request){
-        try{
+                                                    @RequestBody AssignCompanyRequest request) {
+        // Tutaj nie musisz nic zmieniać, jeśli AdminService jest poprawny
+        try {
             adminService.assignUserToCompany(request, userId);
             return ResponseEntity.ok().build();
-        }
-        catch (IllegalArgumentException e){
+        } catch (EntityNotFoundException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        } catch (Exception e) {
+            e.printStackTrace(); // Zobaczysz błąd w konsoli
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 

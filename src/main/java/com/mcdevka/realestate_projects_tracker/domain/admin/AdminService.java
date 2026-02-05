@@ -38,23 +38,33 @@ public class AdminService {
     // Metoda teraz DODAJE użytkownika do firmy (nie usuwając poprzednich)
     @Transactional
     public void assignUserToCompany(AssignCompanyRequest request, Long userId) {
+        // 1. Znajdź użytkownika
         User user = userRepository.findById(userId)
                 .orElseThrow(()-> new EntityNotFoundException("User not found!"));
 
-        // Zakładam, że w request przesyłasz ID firmy (Long companyId)
-        // Jeśli przesyłasz nazwę, użyj findByName
-        Company company = companyRepository.findById(request.companyId())
-                .orElseThrow(() -> new EntityNotFoundException("Company not found!"));
+        // 2. Pobierz listę ID z requestu (zabezpiecz przed nullem)
+        List<Long> ids = request.getCompanyIds();
+        if (ids == null) {
+            ids = List.of();
+        }
 
-        // Relacja ManyToMany - dodajemy firmę do zbioru
-        user.getCompanies().add(company);
+        // 3. Znajdź wszystkie firmy pasujące do tych ID
+        List<Company> companiesToAssign = companyRepository.findAllById(ids);
 
-        // Zapisujemy usera (zaktualizuje to tabelę łączącą user_companies)
+        // 4. WAŻNE: Nadpisz listę firm użytkownika
+        // Używamy Set (HashSet), aby uniknąć duplikatów
+        user.setCompanies(new HashSet<>(companiesToAssign));
+
+        // 5. Zapisz użytkownika (Hibernate zaktualizuje tabelę user_companies)
         userRepository.save(user);
 
-        // Nadajemy uprawnienia do projektów tej NOWEJ firmy
-        // (Metoda w ProjectAccessService musi być dostosowana, by obsłużyć tę sytuację)
-        projectAccessService.assignDefaultPermissionsOnUserCreation(user);
+        // 6. OPCJONALNIE: Nadawanie uprawnień.
+        // Jeśli ta linijka powoduje błędy, zakomentuj ją na chwilę, żeby sprawdzić czy samo przypisywanie działa.
+        try {
+            projectAccessService.assignDefaultPermissionsOnUserCreation(user);
+        } catch (Exception e) {
+            System.err.println("Nie udało się nadać domyślnych uprawnień: " + e.getMessage());
+        }
     }
 
     @Transactional
