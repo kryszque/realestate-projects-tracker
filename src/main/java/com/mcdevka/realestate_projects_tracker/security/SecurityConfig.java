@@ -34,17 +34,17 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
-                        .requestMatchers(HttpMethod.GET, "/api/projects/**")
-                            .hasAnyAuthority("USER", "ADMIN")
-                        .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/tags/**")
-                            .hasAnyAuthority("USER", "ADMIN")
-                        .requestMatchers("/api/tags/**").hasAuthority("ADMIN")
-
-                        .requestMatchers(HttpMethod.GET, "/api/projects/{id}/pillars/**")
-                            .hasAnyAuthority("USER", "ADMIN")
-                        .requestMatchers("/api/projects/{id}/pillars").hasAuthority("ADMIN")
+//                        .requestMatchers(HttpMethod.GET, "/api/projects/**")
+//                            .hasAnyAuthority("USER", "ADMIN")
+//                        .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
+//
+//                        .requestMatchers(HttpMethod.GET, "/api/tags/**")
+//                            .hasAnyAuthority("USER", "ADMIN")
+//                        .requestMatchers("/api/tags/**").hasAuthority("ADMIN")
+//
+//                        .requestMatchers(HttpMethod.GET, "/api/projects/{id}/pillars")
+//                            .hasAnyAuthority("USER", "ADMIN")
+//                        .requestMatchers("/api/projects/{id}/pillars").hasAuthority("ADMIN")
 
                         .anyRequest().authenticated()
                 )
