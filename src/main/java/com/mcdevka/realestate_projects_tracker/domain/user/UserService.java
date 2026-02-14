@@ -6,6 +6,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAcce
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserDetail;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserProject;
 import jakarta.persistence.EntityNotFoundException;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -51,5 +52,39 @@ public class UserService {
                 companyNames, // <--- Tutaj przekazujemy listę zamiast pojedynczego stringa
                 projects
         );
+    }
+
+    @Transactional
+    public UserDetail updateCurrentUser(Long userId, User requestData) {
+        // 1. Pobieramy aktualnego użytkownika z bazy
+        User userFromDb = userRepository.findById(userId)
+                .orElseThrow(() -> new EntityNotFoundException("User not found!"));
+
+        // 2. Walidacja i zmiana maila
+        // Używamy requestData (to co przyszło z frontendu) jako źródła danych
+        if (requestData.getEmail() != null && !requestData.getEmail().isBlank()) {
+            // Jeśli mail jest inny niż obecny, sprawdzamy czy nie jest zajęty
+            if (!requestData.getEmail().equals(userFromDb.getEmail())) {
+                if (userRepository.findByEmail(requestData.getEmail()).isPresent()) {
+                    throw new IllegalArgumentException("Email " + requestData.getEmail() + " jest już zajęty.");
+                }
+                userFromDb.setEmail(requestData.getEmail());
+            }
+        }
+
+        // 3. Aktualizacja imienia i nazwiska
+        // Sprawdzamy czy przyszły w requestData, jeśli tak - nadpisujemy
+        if (requestData.getFirstname() != null && !requestData.getFirstname().isBlank()) {
+            userFromDb.setFirstname(requestData.getFirstname());
+        }
+        if (requestData.getLastname() != null && !requestData.getLastname().isBlank()) {
+            userFromDb.setLastname(requestData.getLastname());
+        }
+
+        // 4. Zapisujemy zmiany
+        userRepository.save(userFromDb);
+
+        // 5. Zwracamy odświeżony widok (UserDetail)
+        return getUserDetails(userId);
     }
 }

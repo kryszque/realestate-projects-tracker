@@ -1,5 +1,6 @@
 package com.mcdevka.realestate_projects_tracker.domain.user;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import jakarta.persistence.*;
 import lombok.*;
@@ -23,7 +24,10 @@ public class User implements UserDetails {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+    @JsonProperty("firstName") // Mapuje klucz "firstname" z JSONa
     private String firstname;
+
+    @JsonProperty("lastName")
     private String lastname;
     @Column(unique = true) // email is going to be the login - it has to be unique
     private String email;

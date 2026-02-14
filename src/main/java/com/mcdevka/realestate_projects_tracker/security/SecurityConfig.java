@@ -34,6 +34,8 @@ public class SecurityConfig {
 
                         .requestMatchers("/api/admin/**").hasAuthority("ADMIN")
 
+                                .requestMatchers("/api/users/**").authenticated()
+
 //                        .requestMatchers(HttpMethod.GET, "/api/projects/**")
 //                            .hasAnyAuthority("USER", "ADMIN")
 //                        .requestMatchers("/api/projects/**").hasAuthority("ADMIN")
