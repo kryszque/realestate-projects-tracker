@@ -192,8 +192,7 @@ public class PillarService {
     }
 
     public List<Pillar> searchPillars(SearchingCriteria criteria){
-        Specification<Pillar> spec = PillarSpecifications.createSearch(criteria);
-        return pillarRepository.findAll(spec);
+        return pillarRepository.searchPillars(criteria);
     }
 
     private Pillar validateProjectId(Long projectId, Long pillarId){

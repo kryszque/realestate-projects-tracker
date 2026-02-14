@@ -21,38 +21,41 @@ public class FilteringService {
         List<Pillar> pillars = criteria.isFilterByPillar() ? sourceData.pillars() : Collections.emptyList();
         List<Item> items = criteria.isFilterByItem() ? sourceData.items() : Collections.emptyList();
 
-        if (!CollectionUtils.isEmpty(criteria.getFilteredTagsNames())) {
-            projects = filterProjects(projects, criteria.getFilteredTagsNames(), criteria.getFilteredPriority());
-            pillars = filterPillars(pillars, criteria.getFilteredTagsNames(),  criteria.getFilteredPriority());
-            items = filterItems(items, criteria.getFilteredTagsNames(), criteria.getFilteredPriority());
+        if (!CollectionUtils.isEmpty(criteria.getFilteredTagsNames()) || criteria.getFilteredPriority() != null || criteria.getCompanyId() != null) {
+            projects = filterProjects(projects, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId());
+            pillars = filterPillars(pillars, criteria.getFilteredTagsNames(),  criteria.getFilteredPriority(), criteria.getCompanyId());
+            items = filterItems(items, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId());
         }
 
         return new GlobalSearchingResultDTO(projects, pillars, items);
     }
 
-    private List<Item> filterItems(List<Item> items, List<String> tagNamesToFind, Integer filteredPriority) {
+    private List<Item> filterItems(List<Item> items, List<String> tagNamesToFind, Integer filteredPriority, Long companyId) {
         if (CollectionUtils.isEmpty(items)) return items;
         return items.stream()
                 .filter(item -> containsAllTags(item.getTags(), tagNamesToFind))
-                .filter(item ->matchesPriority(item.getPriority(), filteredPriority))
+                .filter(item -> matchesPriority(item.getPriority(), filteredPriority))
+                .filter(item -> matchesCompany(item.getCompany() != null ? item.getCompany().getId() : null, companyId))
                 .collect(Collectors.toList());
     }
 
     private List<Project> filterProjects(List<Project> projects, List<String> tagNamesToFind,
-                                         Integer filteredPriority) {
+                                         Integer filteredPriority, Long companyId) {
         if (CollectionUtils.isEmpty(projects)) return projects;
         return projects.stream()
                 .filter(project -> containsAllTags(project.getTags(), tagNamesToFind))
                 .filter(project -> matchesPriority(project.getPriority(),filteredPriority))
+                .filter(project -> matchesCompany(project.getCompany() != null ? project.getCompany().getId() : null, companyId))
                 .collect(Collectors.toList());
     }
 
     private List<Pillar> filterPillars(List<Pillar> pillars, List<String> tagNamesToFind,
-                                       Integer filteredPriority) {
+                                       Integer filteredPriority, Long companyId) {
         if (CollectionUtils.isEmpty(pillars)) return pillars;
         return pillars.stream()
                 .filter(pillar -> containsAllTags(pillar.getTags(), tagNamesToFind))
                 .filter(pillar -> matchesPriority(pillar.getPriority(),filteredPriority))
+                .filter(pillar -> matchesCompany(pillar.getCompany() != null ? pillar.getCompany().getId() : null, companyId))
                 .collect(Collectors.toList());
     }
 
@@ -78,5 +81,13 @@ public class FilteringService {
         }
 
         return itemPriority != null && itemPriority.equals(filteredPriority);
+    }
+
+    private boolean matchesCompany(Long itemCompany, Long filteredCompany) {
+        if (filteredCompany == null) {
+            return true;
+        }
+
+        return itemCompany != null && itemCompany.equals(filteredCompany);
     }
 }

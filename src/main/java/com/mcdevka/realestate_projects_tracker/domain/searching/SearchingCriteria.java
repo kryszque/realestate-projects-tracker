@@ -15,4 +15,6 @@ public class SearchingCriteria {
 
     private Long projectId;
     private Long pillarId;
+
+    private List<Long> userAllowedCompanyIds;
 }

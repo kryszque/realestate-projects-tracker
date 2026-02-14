@@ -163,8 +163,7 @@ public class ProjectService {
     }
 
     public List<Project> searchProjects(SearchingCriteria criteria) {
-        Specification<Project> spec = ProjectSpecifications.createSearch(criteria);
-        return projectRepository.findAll(spec);
+        return projectRepository.searchProjects(criteria);
     }
 
     private void checkForProjectDuplicates(Project inputProject){

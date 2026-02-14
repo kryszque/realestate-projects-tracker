@@ -1,6 +1,7 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
@@ -21,4 +22,11 @@ public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificat
     @Modifying // Informuje Springa, że to zapytanie zmienia dane (UPDATE/DELETE)
     @Query("UPDATE Item i SET i.company = :company WHERE i.pillar.project.id = :projectId")
     void updateCompanyForProject(@Param("projectId") Long projectId, @Param("company") Company company);
+
+    @Query("SELECT i FROM Item i WHERE " +
+            "(:#{#criteria.name} IS NULL OR LOWER(i.name) LIKE LOWER(CONCAT('%', :#{#criteria.name}, '%'))) " +
+            // ... inne warunki ...
+            // Sprawdź ścieżkę do firmy! (Item -> Pillar -> Project -> Company)
+            "AND (:#{#criteria.userAllowedCompanyIds} IS NULL OR i.pillar.project.company.id IN :#{#criteria.userAllowedCompanyIds})")
+    List<Item> searchItems(@Param("criteria") SearchingCriteria criteria);
 }

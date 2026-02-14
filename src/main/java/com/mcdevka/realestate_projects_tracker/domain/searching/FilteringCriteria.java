@@ -11,4 +11,6 @@ public class FilteringCriteria {
     private boolean filterByItem = true;
     private List<String> filteredTagsNames;
     private Integer filteredPriority;
+
+    private Long companyId;
 }
