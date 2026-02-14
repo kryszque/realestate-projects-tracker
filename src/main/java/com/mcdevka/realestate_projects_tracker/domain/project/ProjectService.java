@@ -12,6 +12,7 @@ import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.Role;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
@@ -35,6 +36,7 @@ public class ProjectService {
     private final AdminService adminService;
     private final PillarRepository pillarRepository;
     private final ItemRepository itemRepository;
+    private final GoogleDriveService googleDriveService;
 
     public List<Project> getAllProjects(){
         User currentUser = accessControlService.getCurrentUser();
@@ -82,6 +84,15 @@ public class ProjectService {
             }
 
             createdProject.setTags(tagsToAdd);
+        }
+
+        try {
+            com.google.api.services.drive.model.File folder =
+                    googleDriveService.createFolder(createdProject.getName(), googleDriveService.getRootFolderId());
+            createdProject.setDriveFolderId(folder.getId());
+            createdProject.setDriveFolderLink(folder.getWebViewLink());
+        } catch (Exception e) {
+            throw new RuntimeException("Nie udało się utworzyć folderu na Dysku Google dla projektu", e);
         }
 
         Project savedProject = projectRepository.save(createdProject);

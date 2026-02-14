@@ -68,4 +68,6 @@ public class Item {
             this.startDate = LocalDate.now();
         }
     }
+    private String driveFolderId;
+    private String driveFolderLink;
 }
