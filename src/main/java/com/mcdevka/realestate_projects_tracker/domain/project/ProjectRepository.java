@@ -29,6 +29,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
 
     // Znajdź projekty dla jednej konkretnej firmy (do usuwania uprawnień)
     List<Project> findByStateNotAndCompany(String state, Company company);
+    @Query("SELECT p.id FROM Project p WHERE p.company.id IN :companyIds")
+    List<Long> findProjectIdsByCompanyIds(@Param("companyIds") List<Long> companyIds);
 
     @Query("SELECT p FROM Project p WHERE " +
             "(:#{#criteria.name} IS NULL OR LOWER(p.name) LIKE LOWER(CONCAT('%', :#{#criteria.name}, '%'))) " +

@@ -18,9 +18,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -48,6 +47,12 @@ public class AdminService {
             ids = List.of();
         }
 
+        List<Long> oldCompaniesIds = user.getCompanies().stream().map(Company::getId).toList();
+        List<Long> exclusiveOldCompaniesIds = new ArrayList<>(oldCompaniesIds);
+        exclusiveOldCompaniesIds.removeAll(ids);
+
+        List<Long> exclusiveOldCompaniesProjectsIds = projectRepository.findProjectIdsByCompanyIds(exclusiveOldCompaniesIds);
+
         // 3. Znajdź wszystkie firmy pasujące do tych ID
         List<Company> companiesToAssign = companyRepository.findAllById(ids);
 
@@ -62,6 +67,7 @@ public class AdminService {
         // Jeśli ta linijka powoduje błędy, zakomentuj ją na chwilę, żeby sprawdzić czy samo przypisywanie działa.
         try {
             projectAccessService.assignDefaultPermissionsOnUserCreation(user);
+            projectAccessRepository.deleteAllByUserIdAndProjectsIds(user.getId(), exclusiveOldCompaniesProjectsIds);
         } catch (Exception e) {
             System.err.println("Nie udało się nadać domyślnych uprawnień: " + e.getMessage());
         }
