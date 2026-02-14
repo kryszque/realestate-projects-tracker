@@ -1,8 +1,10 @@
 package com.mcdevka.realestate_projects_tracker.domain.item;
 
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 import java.util.Optional;
@@ -12,8 +14,12 @@ import java.util.Optional;
 @CrossOrigin(origins = "http://localhost:5173")
 public class ItemController {
     private final ItemService itemService;
+    private final GoogleDriveService googleDriveService;
 
-    public ItemController(ItemService itemService) {this.itemService = itemService;}
+    public ItemController(ItemService itemService, GoogleDriveService googleDriveService) {
+        this.itemService = itemService;
+        this.googleDriveService = googleDriveService;
+    }
 
     @GetMapping
     public ResponseEntity<List<Item>> getItemsForPillar(@PathVariable Long projectId, @PathVariable Long pillarId) {
@@ -174,6 +180,55 @@ public class ItemController {
             return ResponseEntity.ok(updatedHistory);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PostMapping(value = "/{id}/files", consumes = {"multipart/form-data"})
+    public ResponseEntity<ItemHistory> uploadFileToItem(
+            @PathVariable Long projectId,
+            @PathVariable Long pillarId,
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file,
+            @RequestParam("description") String description) {
+
+        try {
+            Item item = itemService.getItemById(projectId, pillarId, id);
+
+            // 1. ZABEZPIECZENIE: Sprawdź czy item ma folder
+            String targetFolderId = item.getDriveFolderId();
+
+            if (targetFolderId == null || targetFolderId.isEmpty()) {
+                // FALLBACK: Jeśli item nie ma folderu (np. stare dane),
+                // użyj głównego folderu aplikacji, aby upload się udał.
+                System.out.println("UWAGA: Item ID " + id + " nie ma folderu Drive. Wgrywam do Root.");
+                targetFolderId = googleDriveService.getRootFolderId();
+
+                // Opcjonalnie tutaj można by dopisać logikę tworzenia folderu "naprawczego",
+                // ale fallback do root jest najbezpieczniejszy na start.
+            }
+
+            // 2. Wgrywanie na GDrive
+            com.google.api.services.drive.model.File uploadedFile =
+                    googleDriveService.uploadFile(file, targetFolderId);
+
+            // 3. Tworzenie wpisu w historii
+            ItemHistory historyEntry = new ItemHistory();
+            // Jeśli opis jest pusty, wpisz nazwę pliku
+            historyEntry.setDescription((description == null || description.trim().isEmpty())
+                    ? "Wysłano plik: " + file.getOriginalFilename()
+                    : description);
+
+            historyEntry.setAuthor("User"); // Tu docelowo wstawisz zalogowanego usera
+            historyEntry.setGoogleFileId(uploadedFile.getId());
+            historyEntry.setWebViewLink(uploadedFile.getWebViewLink());
+
+            ItemHistory createdHistory = itemService.addHistoryEntry(projectId, pillarId, id, historyEntry);
+            return new ResponseEntity<>(createdHistory, HttpStatus.CREATED);
+
+        } catch (Exception e) {
+            // To pokaże prawdziwy błąd w konsoli IntelliJ
+            e.printStackTrace();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

@@ -70,7 +70,12 @@ public class GoogleDriveService {
     public File uploadFile(MultipartFile file, String parentFolderId) throws IOException {
         File fileMetadata = new File();
         fileMetadata.setName(file.getOriginalFilename());
-        fileMetadata.setParents(Collections.singletonList(parentFolderId));
+
+        // Ważne: parentFolderId nie może być nullem tutaj,
+        // ale zabezpieczyliśmy to w Controllerze.
+        if (parentFolderId != null) {
+            fileMetadata.setParents(Collections.singletonList(parentFolderId));
+        }
 
         InputStreamContent mediaContent = new InputStreamContent(file.getContentType(), file.getInputStream());
 
