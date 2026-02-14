@@ -258,8 +258,7 @@ public class ItemService {
     }
 
     public List<Item> searchItems(SearchingCriteria criteria) {
-        Specification<Item> spec = ItemSpecifications.createSearch(criteria);
-        return itemRepository.findAll(spec);
+        return itemRepository.searchItems(criteria);
     }
 
     private void checkForItemDuplicates(String name, String state, Company personResponsible, String companyResposible, Long pillarId, Integer priority) {

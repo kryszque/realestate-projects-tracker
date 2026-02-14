@@ -21,6 +21,11 @@ public class UserService {
     private final ProjectService projectService;
     private final ProjectAccessService projectAccessService;
 
+    public User getUserByEmail(String email) {
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new EntityNotFoundException("User not found with email: " + email));
+    }
+
     public UserDetail getUserDetails(Long userId){
         User user = userRepository.findById(userId).orElseThrow(() ->
                 new EntityNotFoundException("User not found!"));
