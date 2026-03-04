@@ -7,6 +7,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,12 +26,14 @@ public class PillarService {
     private final PillarRepository pillarRepository;
     private final ProjectRepository projectRepository;
     private final TagRepository tagRepository;
+    private final GoogleDriveService googleDriveService;
 
     public PillarService(PillarRepository pillarRepository, ProjectRepository projectRepository,
-                         TagRepository tagRepository) {
+                         TagRepository tagRepository, GoogleDriveService googleDriveService) {
         this.pillarRepository = pillarRepository;
         this.projectRepository = projectRepository;
         this.tagRepository = tagRepository;
+        this.googleDriveService = googleDriveService;
     }
 
     public List<Pillar> initializeDefaultPillars(Project project){
@@ -121,6 +124,15 @@ public class PillarService {
             }
 
             newPillar.setTags(tagsToAdd);
+        }
+
+        try {
+            com.google.api.services.drive.model.File folder =
+                    googleDriveService.createFolder(newPillar.getName(), project.getDriveFolderId());
+            newPillar.setDriveFolderId(folder.getId());
+            newPillar.setDriveFolderLink(folder.getWebViewLink());
+        } catch (Exception e) {
+            throw new RuntimeException("Nie udało się utworzyć folderu na Dysku Google dla filaru", e);
         }
 
         return pillarRepository.save(newPillar);

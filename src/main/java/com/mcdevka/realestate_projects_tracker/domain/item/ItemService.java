@@ -7,6 +7,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPerm
 import com.mcdevka.realestate_projects_tracker.domain.searching.SearchingCriteria;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
@@ -24,11 +25,13 @@ public class ItemService {
     private final ItemRepository itemRepository;
     private final PillarRepository pillarRepository;
     private final TagRepository tagRepository;
+    private final GoogleDriveService googleDriveService;
 
-    public ItemService(ItemRepository itemRepository, PillarRepository pillarRepository, TagRepository tagRepository) {
+    public ItemService(ItemRepository itemRepository, PillarRepository pillarRepository, TagRepository tagRepository, GoogleDriveService googleDriveService) {
         this.itemRepository = itemRepository;
         this.pillarRepository = pillarRepository;
         this.tagRepository = tagRepository;
+        this.googleDriveService = googleDriveService;
     }
 
     private Pillar validatePillarPath(Long projectId, Long pillarId) {
@@ -84,6 +87,26 @@ public class ItemService {
             }
 
             createdItem.setTags(tagsToAdd);
+        }
+
+        try {
+            if (inputItem.getCustomDriveFolderId() != null && !inputItem.getCustomDriveFolderId().isEmpty()) {
+                // Użytkownik podał własny link/ID folderu (zakładamy, że podał ID)
+                com.google.api.services.drive.model.File existingFolder = googleDriveService.getFolder(inputItem.getCustomDriveFolderId());
+                createdItem.setDriveFolderId(existingFolder.getId());
+                createdItem.setDriveFolderLink(existingFolder.getWebViewLink());
+            } else {
+                // Standardowe tworzenie folderu wewnątrz filaru
+                String parentFolderId = pillar.getDriveFolderId();
+                if(parentFolderId == null) parentFolderId = googleDriveService.getRootFolderId(); // Fallback
+
+                com.google.api.services.drive.model.File folder =
+                        googleDriveService.createFolder(createdItem.getName(), parentFolderId);
+                createdItem.setDriveFolderId(folder.getId());
+                createdItem.setDriveFolderLink(folder.getWebViewLink());
+            }
+        } catch (Exception e) {
+            throw new RuntimeException("Błąd podczas konfiguracji folderu Google Drive", e);
         }
 
         return itemRepository.save(createdItem);
