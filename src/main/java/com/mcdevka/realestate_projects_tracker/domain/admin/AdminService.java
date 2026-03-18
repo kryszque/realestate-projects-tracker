@@ -12,14 +12,16 @@ import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectAcce
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserRepository;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import jakarta.persistence.EntityNotFoundException;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 @Service
 @RequiredArgsConstructor
@@ -28,8 +30,9 @@ public class AdminService {
     private final ProjectAccessRepository projectAccessRepository;
     private final UserRepository userRepository;
     private final ProjectRepository projectRepository;
-    private final CompanyRepository companyRepository; // <--- Nowe wstrzyknięcie
+    private final CompanyRepository companyRepository;
     private final ProjectAccessService projectAccessService;
+    private final GoogleDriveService googleDriveService;
 
     @Value("${application.default-admin.mail}")
     private String adminMail;
@@ -95,6 +98,13 @@ public class AdminService {
                         .build());
 
         access.setPermissions(new HashSet<>(grantedPermissions));
+        if(grantedPermissions.isEmpty()) {
+            googleDriveService.removeUserFromDriveFiles(user.getId(), project.getId());
+        }
+        else{
+            googleDriveService.assignUserToDriveFiles(project.getId(), user.getId(), null, grantedPermissions);
+        }
+
         projectAccessRepository.save(access);
     }
 
@@ -102,7 +112,7 @@ public class AdminService {
     public User deleteUser(Long userId){
         User choseUser = userRepository.findById(userId).orElseThrow(
                 ()-> new EntityNotFoundException("User not found!"));
-
+        googleDriveService.removeUserFromDriveFiles(choseUser.getId(), choseUser.getId());
         userRepository.delete(choseUser);
         return choseUser;
     }

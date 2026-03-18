@@ -6,6 +6,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserProject;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -22,6 +23,7 @@ public class ProjectAccessService {
     private final ProjectAccessRepository projectAccessRepository;
     private final ProjectRepository projectRepository;
     private final UserRepository userRepository;
+    private final GoogleDriveService googleDriveService;
 
     public UserProject getUserProject(Long userId, Long projectId) {
         Project project = projectRepository.findById(projectId).orElseThrow(
@@ -61,6 +63,7 @@ public class ProjectAccessService {
 
         for(Project project : projects){
             assignViewPermission(user, project);
+            googleDriveService.assignUserToDriveFiles(project.getId(), user.getId(), "CAN_VIEW", null);
         }
     }
 

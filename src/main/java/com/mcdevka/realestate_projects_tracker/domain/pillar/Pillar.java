@@ -57,4 +57,6 @@ public class Pillar {
     @JsonIgnoreProperties("pillar")
     @Where(clause = "state != 'archived'")
     List<Item> items;
+    private String driveFolderId;
+    private String driveFolderLink;
 }

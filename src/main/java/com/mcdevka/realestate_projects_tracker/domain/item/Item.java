@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.item;
 
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.Pillar;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
@@ -68,4 +69,10 @@ public class Item {
             this.startDate = LocalDate.now();
         }
     }
+    private String driveFolderId;
+    private String driveFolderLink;
+
+    @Transient
+    @JsonProperty("customDriveFolderId")
+    private String customDriveFolderId;
 }

@@ -12,6 +12,7 @@ import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
 import com.mcdevka.realestate_projects_tracker.domain.user.Role;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
@@ -35,6 +36,7 @@ public class ProjectService {
     private final AdminService adminService;
     private final PillarRepository pillarRepository;
     private final ItemRepository itemRepository;
+    private final GoogleDriveService googleDriveService;
 
     public List<Project> getAllProjects(){
         User currentUser = accessControlService.getCurrentUser();
@@ -70,6 +72,16 @@ public class ProjectService {
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
         createdProject.setPriority(inputProject.getPriority());
+
+        try {
+            com.google.api.services.drive.model.File folder =
+                    googleDriveService.createFolder(createdProject.getName(), googleDriveService.getRootFolderId());
+            createdProject.setDriveFolderId(folder.getId());
+            createdProject.setDriveFolderLink(folder.getWebViewLink());
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't create drive folder for this project", e);
+        }
+
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
         if (inputProject.getTags() != null && !inputProject.getTags().isEmpty()) {

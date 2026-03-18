@@ -7,6 +7,7 @@ import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.tag.Tag;
 import com.mcdevka.realestate_projects_tracker.domain.tag.TagRepository;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import org.springframework.data.jpa.domain.Specification;
@@ -25,49 +26,44 @@ public class PillarService {
     private final PillarRepository pillarRepository;
     private final ProjectRepository projectRepository;
     private final TagRepository tagRepository;
+    private final GoogleDriveService googleDriveService;
 
     public PillarService(PillarRepository pillarRepository, ProjectRepository projectRepository,
-                         TagRepository tagRepository) {
+                         TagRepository tagRepository, GoogleDriveService googleDriveService) {
         this.pillarRepository = pillarRepository;
         this.projectRepository = projectRepository;
         this.tagRepository = tagRepository;
+        this.googleDriveService = googleDriveService;
     }
 
     public List<Pillar> initializeDefaultPillars(Project project){
-        List<Pillar> threePillars = new ArrayList<>();
-        Pillar p1 = new Pillar();
-        p1.setCompany(project.getCompany());
-        p1.setName("Design");
-        p1.setStartDate(LocalDate.now());
-        p1.setState("active");
-        p1.setProject(project);
-        threePillars.add(p1);
+        List<Pillar> pillars = new ArrayList<>();
 
-        Pillar p2 = new Pillar();
-        p2.setCompany(project.getCompany());
-        p2.setName("Relacje");
-        p2.setStartDate(LocalDate.now());
-        p2.setState("active");
-        p2.setProject(project);
-        threePillars.add(p2);
+        String[] defaultNames = {"Design", "Relacje", "Prawo", "INFO"};
 
-        Pillar p3 = new Pillar();
-        p3.setCompany(project.getCompany());
-        p3.setName("Prawo");
-        p3.setStartDate(LocalDate.now());
-        p3.setState("active");
-        p3.setProject(project);
-        threePillars.add(p3);
+        for (String name : defaultNames) {
+            Pillar p = new Pillar();
+            p.setCompany(project.getCompany());
+            p.setName(name);
+            p.setStartDate(LocalDate.now());
+            p.setState("active");
+            p.setProject(project);
 
-        Pillar p4 = new Pillar();
-        p4.setCompany(project.getCompany());
-        p4.setName("INFO");
-        p4.setStartDate(LocalDate.now());
-        p4.setState("active");
-        p4.setProject(project);
-        threePillars.add(p4);
+            try {
+                if (project.getDriveFolderId() != null) {
+                    com.google.api.services.drive.model.File folder =
+                            googleDriveService.createFolder(p.getName(), project.getDriveFolderId());
+                    p.setDriveFolderId(folder.getId());
+                    p.setDriveFolderLink(folder.getWebViewLink());
+                }
+            } catch (Exception e) {
+                System.err.println("Couldn't create drive folder for this module " + name + ": " + e.getMessage());
+            }
 
-        return threePillars;
+            pillars.add(p);
+        }
+
+        return pillars;
     }
 
     @CheckAccess(ProjectPermissions.CAN_VIEW)
@@ -121,6 +117,15 @@ public class PillarService {
             }
 
             newPillar.setTags(tagsToAdd);
+        }
+
+        try {
+            com.google.api.services.drive.model.File folder =
+                    googleDriveService.createFolder(newPillar.getName(), project.getDriveFolderId());
+            newPillar.setDriveFolderId(folder.getId());
+            newPillar.setDriveFolderLink(folder.getWebViewLink());
+        } catch (Exception e) {
+            throw new RuntimeException("Nie udało się utworzyć folderu na Dysku Google dla filaru", e);
         }
 
         return pillarRepository.save(newPillar);
