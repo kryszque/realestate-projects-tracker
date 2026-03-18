@@ -71,6 +71,7 @@ public class GoogleDriveService {
 
         return driveService.files().create(fileMetadata)
                 .setFields("id, webViewLink")
+                .setSupportsAllDrives(true)
                 .execute();
     }
 
@@ -78,6 +79,7 @@ public class GoogleDriveService {
     public File getFolder(String folderId) throws IOException {
         return driveService.files().get(folderId)
                 .setFields("id, webViewLink")
+                .setSupportsAllDrives(true)
                 .execute();
     }
 
@@ -96,6 +98,7 @@ public class GoogleDriveService {
 
         return driveService.files().create(fileMetadata, mediaContent)
                 .setFields("id, webViewLink, name")
+                .setSupportsAllDrives(true)
                 .execute();
     }
     public void shareFolder(String folderId, String userEmail, String role) throws IOException {
@@ -108,7 +111,8 @@ public class GoogleDriveService {
         try {
             driveService.permissions().create(folderId, userPermission)
                     .setFields("id")
-                    .setSendNotificationEmail(false) // Czy wysłać maila od Google? (false = po cichu)
+                    .setSendNotificationEmail(false)
+                    .setSupportsAllDrives(true)
                     .execute();
         } catch (Exception e) {
             // Ignorujemy błąd, jeśli użytkownik już ma dostęp, lub logujemy go
@@ -128,7 +132,9 @@ public class GoogleDriveService {
 
         for (Permission p : permissions) {
             if (userEmail.equalsIgnoreCase(p.getEmailAddress())) {
-                driveService.permissions().delete(folderId, p.getId()).execute();
+                driveService.permissions().delete(folderId, p.getId())
+                        .setSupportsAllDrives(true)
+                        .execute();
                 break; // Znaleziono i usunięto
             }
         }

@@ -72,6 +72,16 @@ public class ProjectService {
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
         createdProject.setPriority(inputProject.getPriority());
+
+        try {
+            com.google.api.services.drive.model.File folder =
+                    googleDriveService.createFolder(createdProject.getName(), googleDriveService.getRootFolderId());
+            createdProject.setDriveFolderId(folder.getId());
+            createdProject.setDriveFolderLink(folder.getWebViewLink());
+        } catch (Exception e) {
+            throw new RuntimeException("Couldn't create drive folder for this project", e);
+        }
+
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
         if (inputProject.getTags() != null && !inputProject.getTags().isEmpty()) {
@@ -84,15 +94,6 @@ public class ProjectService {
             }
 
             createdProject.setTags(tagsToAdd);
-        }
-
-        try {
-            com.google.api.services.drive.model.File folder =
-                    googleDriveService.createFolder(createdProject.getName(), googleDriveService.getRootFolderId());
-            createdProject.setDriveFolderId(folder.getId());
-            createdProject.setDriveFolderLink(folder.getWebViewLink());
-        } catch (Exception e) {
-            throw new RuntimeException("Nie udało się utworzyć folderu na Dysku Google dla projektu", e);
         }
 
         Project savedProject = projectRepository.save(createdProject);

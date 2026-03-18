@@ -37,40 +37,33 @@ public class PillarService {
     }
 
     public List<Pillar> initializeDefaultPillars(Project project){
-        List<Pillar> threePillars = new ArrayList<>();
-        Pillar p1 = new Pillar();
-        p1.setCompany(project.getCompany());
-        p1.setName("Design");
-        p1.setStartDate(LocalDate.now());
-        p1.setState("active");
-        p1.setProject(project);
-        threePillars.add(p1);
+        List<Pillar> pillars = new ArrayList<>();
 
-        Pillar p2 = new Pillar();
-        p2.setCompany(project.getCompany());
-        p2.setName("Relacje");
-        p2.setStartDate(LocalDate.now());
-        p2.setState("active");
-        p2.setProject(project);
-        threePillars.add(p2);
+        String[] defaultNames = {"Design", "Relacje", "Prawo", "INFO"};
 
-        Pillar p3 = new Pillar();
-        p3.setCompany(project.getCompany());
-        p3.setName("Prawo");
-        p3.setStartDate(LocalDate.now());
-        p3.setState("active");
-        p3.setProject(project);
-        threePillars.add(p3);
+        for (String name : defaultNames) {
+            Pillar p = new Pillar();
+            p.setCompany(project.getCompany());
+            p.setName(name);
+            p.setStartDate(LocalDate.now());
+            p.setState("active");
+            p.setProject(project);
 
-        Pillar p4 = new Pillar();
-        p4.setCompany(project.getCompany());
-        p4.setName("INFO");
-        p4.setStartDate(LocalDate.now());
-        p4.setState("active");
-        p4.setProject(project);
-        threePillars.add(p4);
+            try {
+                if (project.getDriveFolderId() != null) {
+                    com.google.api.services.drive.model.File folder =
+                            googleDriveService.createFolder(p.getName(), project.getDriveFolderId());
+                    p.setDriveFolderId(folder.getId());
+                    p.setDriveFolderLink(folder.getWebViewLink());
+                }
+            } catch (Exception e) {
+                System.err.println("Couldn't create drive folder for this module " + name + ": " + e.getMessage());
+            }
 
-        return threePillars;
+            pillars.add(p);
+        }
+
+        return pillars;
     }
 
     @CheckAccess(ProjectPermissions.CAN_VIEW)
