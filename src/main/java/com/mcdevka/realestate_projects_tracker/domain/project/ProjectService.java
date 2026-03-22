@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.project;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.AdminService;
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
+import com.mcdevka.realestate_projects_tracker.domain.company.CompanyRepository;
 import com.mcdevka.realestate_projects_tracker.domain.item.ItemRepository;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarRepository;
 import com.mcdevka.realestate_projects_tracker.domain.pillar.PillarService;
@@ -16,6 +17,7 @@ import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveS
 import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
 import com.mcdevka.realestate_projects_tracker.security.annotation.CheckAccess;
 import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
+import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.jpa.domain.Specification;
@@ -37,6 +39,7 @@ public class ProjectService {
     private final PillarRepository pillarRepository;
     private final ItemRepository itemRepository;
     private final GoogleDriveService googleDriveService;
+    private final CompanyRepository companyRepository;
 
     public List<Project> getAllProjects(){
         User currentUser = accessControlService.getCurrentUser();
@@ -61,38 +64,59 @@ public class ProjectService {
     }
 
     @CheckAccess(ProjectPermissions.CAN_CREATE)
+    @Transactional // ADDED @Transactional because we are modifying and saving the Company entity now
     public Project createProject(Project inputProject){
-
+        validateCompanyPresence(inputProject);
         checkForProjectDuplicates(inputProject);
 
         Project createdProject = new Project();
-
         setChangableFields(inputProject, createdProject);
 
         createdProject.setStartDate(LocalDate.now());
         createdProject.setState("active");
         createdProject.setPriority(inputProject.getPriority());
 
+        // --- NEW DRIVE HIERARCHY LOGIC ---
+        // 1. Fetch the managed Company entity from the database
+        Company company = companyRepository.findById(inputProject.getCompany().getId())
+                .orElseThrow(() -> new EntityNotFoundException("Company not found"));
+
+        // 2. Check if the Company already has a Drive folder. If not, create it.
+        if (company.getDriveFolderId() == null || company.getDriveFolderId().isBlank()) {
+            try {
+                // Pass null to create the folder in the configured root directory
+                com.google.api.services.drive.model.File companyFolder =
+                        googleDriveService.createFolder(company.getName(), null);
+
+                company.setDriveFolderId(companyFolder.getId());
+                company.setDriveFolderLink(companyFolder.getWebViewLink());
+                companyRepository.save(company); // Save the company with its new folder ID
+            } catch (Exception e) {
+                throw new RuntimeException("Couldn't create drive folder for the company", e);
+            }
+        }
+
+        // 3. Create the Project folder inside the Company folder
         try {
-            com.google.api.services.drive.model.File folder =
-                    googleDriveService.createFolder(createdProject.getName(), googleDriveService.getRootFolderId());
-            createdProject.setDriveFolderId(folder.getId());
-            createdProject.setDriveFolderLink(folder.getWebViewLink());
+            com.google.api.services.drive.model.File projectFolder =
+                    googleDriveService.createFolder(createdProject.getName(), company.getDriveFolderId());
+
+            createdProject.setDriveFolderId(projectFolder.getId());
+            createdProject.setDriveFolderLink(projectFolder.getWebViewLink());
         } catch (Exception e) {
             throw new RuntimeException("Couldn't create drive folder for this project", e);
         }
+        // --- END DRIVE HIERARCHY LOGIC ---
 
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
         if (inputProject.getTags() != null && !inputProject.getTags().isEmpty()) {
             Set<Tag> tagsToAdd = new HashSet<>();
-
             for (var tagDto : inputProject.getTags()) {
                 Tag tag = tagRepository.findById(tagDto.getId())
                         .orElseThrow(() -> new IllegalArgumentException("Tag not found: " + tagDto.getId()));
                 tagsToAdd.add(tag);
             }
-
             createdProject.setTags(tagsToAdd);
         }
 
@@ -105,6 +129,8 @@ public class ProjectService {
     @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
     public Project updateProjectInfo(@ProjectId Long id, Project updatedProjectData) {
+        // --- NEW VALIDATION: Ensure company is provided during update ---
+        validateCompanyPresence(updatedProjectData);
 
         Project existingProject = getProjectById(id);
 
@@ -197,5 +223,12 @@ public class ProjectService {
         existingProject.setPriority(inputProject.getPriority());
         existingProject.setPersonResponsible(inputProject.getPersonResponsible());
         existingProject.setCompany(inputProject.getCompany());
+    }
+
+    // --- NEW HELPER METHOD ---
+    private void validateCompanyPresence(Project project) {
+        if (project.getCompany() == null || project.getCompany().getId() == null) {
+            throw new IllegalArgumentException("A Project must be associated with a Company. Company is required.");
+        }
     }
 }

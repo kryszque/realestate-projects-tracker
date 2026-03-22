@@ -37,4 +37,10 @@ public class Company {
     @OneToMany(mappedBy = "company")
     @JsonIgnore
     private Set<Item> items = new HashSet<>();
+
+    @Column(name = "drive_folder_id")
+    private String driveFolderId;
+
+    @Column(name = "drive_folder_link")
+    private String driveFolderLink;
 }

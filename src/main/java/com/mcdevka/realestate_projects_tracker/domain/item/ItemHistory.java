@@ -57,4 +57,14 @@ public class ItemHistory {
     @JoinColumn(name = "item_id", nullable = false)
     @JsonIgnore
     private Item item;
+
+    @JsonProperty("itemId")
+    public Long getItemIdForJson() {
+        return this.item != null ? this.item.getId() : null;
+    }
+
+    @JsonProperty("pillarId")
+    public Long getPillarIdForJson() {
+        return (this.item != null && this.item.getPillar() != null) ? this.item.getPillar().getId() : null;
+    }
 }

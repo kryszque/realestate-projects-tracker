@@ -1,6 +1,9 @@
 package com.mcdevka.realestate_projects_tracker.domain.pillar;
 
 
+import com.mcdevka.realestate_projects_tracker.domain.item.ItemHistory;
+import com.mcdevka.realestate_projects_tracker.domain.item.ItemService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -10,12 +13,10 @@ import java.util.List;
 @RestController
 @RequestMapping("api/projects/{projectId}/pillars")
 @CrossOrigin(origins = "http://localhost:5173")
+@RequiredArgsConstructor
 public class PillarController {
     private final PillarService pillarService;
-
-    public PillarController(PillarService pillarService) {
-        this.pillarService = pillarService;
-    }
+    private final ItemService itemService;
 
     @GetMapping
     public ResponseEntity<List<Pillar>> getAllPillarsForAProject(@PathVariable Long projectId){
@@ -104,5 +105,13 @@ public class PillarController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
+    }
+
+    @GetMapping("/{pillarId}/pinned-history")
+    public ResponseEntity<List<ItemHistory>> getPillarPinnedHistory(
+            @PathVariable Long projectId, // Ten parametr pochodzi z @RequestMapping klasy
+            @PathVariable Long pillarId) {
+        List<ItemHistory> pinned = itemService.getPinnedHistoryForPillar(pillarId);
+        return ResponseEntity.ok(pinned);
     }
 }

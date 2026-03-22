@@ -29,4 +29,11 @@ public interface ItemRepository extends JpaRepository<Item, Long>, JpaSpecificat
             // Sprawdź ścieżkę do firmy! (Item -> Pillar -> Project -> Company)
             "AND (:#{#criteria.userAllowedCompanyIds} IS NULL OR i.pillar.project.company.id IN :#{#criteria.userAllowedCompanyIds})")
     List<Item> searchItems(@Param("criteria") SearchingCriteria criteria);
+
+    @Query("SELECT ih FROM ItemHistory ih WHERE ih.item.pillar.project.id = :projectId AND ih.isPinned = true AND ih.state != 'archived'")
+    List<ItemHistory> findPinnedByProjectId(@Param("projectId") Long projectId);
+
+    // Wszystkie przypięte dla Filara
+    @Query("SELECT ih FROM ItemHistory ih WHERE ih.item.pillar.id = :pillarId AND ih.isPinned = true AND ih.state != 'archived'")
+    List<ItemHistory> findPinnedByPillarId(@Param("pillarId") Long pillarId);
 }

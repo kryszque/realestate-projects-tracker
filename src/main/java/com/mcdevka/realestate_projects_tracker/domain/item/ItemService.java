@@ -316,4 +316,14 @@ public class ItemService {
         return itemRepository.save(history.getItem()).getHistoryEntries()
                 .stream().filter(h -> h.getId().equals(historyId)).findFirst().get();
     }
+
+    @Transactional(readOnly = true)
+    public List<ItemHistory> getPinnedHistoryForProject(Long projectId) {
+        return itemRepository.findPinnedByProjectId(projectId);
+    }
+
+    @Transactional(readOnly = true)
+    public List<ItemHistory> getPinnedHistoryForPillar(Long pillarId) {
+        return itemRepository.findPinnedByPillarId(pillarId);
+    }
 }

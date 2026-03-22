@@ -14,11 +14,9 @@ import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserRepository;
-import com.mcdevka.realestate_projects_tracker.domain.user.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.annotation.PostConstruct;
@@ -27,7 +25,6 @@ import java.io.InputStream;
 import java.security.GeneralSecurityException;
 import java.util.Collections;
 import java.util.List;
-import java.util.Optional;
 import java.util.Set;
 
 @Service
@@ -35,6 +32,8 @@ import java.util.Set;
 public class GoogleDriveService {
 
     private final UserRepository userRepository;
+    private final ProjectRepository projectRepository; // 🔴 POPRAWKA: Dodano słowo 'final'!
+
     @Value("${google.drive.credentials.file.path}")
     private String credentialsFilePath;
 
@@ -42,7 +41,6 @@ public class GoogleDriveService {
     private String rootFolderId;
 
     private Drive driveService;
-    private ProjectRepository projectRepository;
 
     @PostConstruct
     public void init() throws GeneralSecurityException, IOException {
@@ -67,7 +65,14 @@ public class GoogleDriveService {
         File fileMetadata = new File();
         fileMetadata.setName(folderName);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
-        fileMetadata.setParents(Collections.singletonList(parentId));
+
+        // 🔴 POPRAWKA: Sprawdzamy czy parentId istnieje.
+        // Jeśli nie, wrzucamy do głównego folderu konfiguracyjnego (rootFolderId)
+        if (parentId != null && !parentId.isBlank()) {
+            fileMetadata.setParents(Collections.singletonList(parentId));
+        } else if (rootFolderId != null && !rootFolderId.isBlank()) {
+            fileMetadata.setParents(Collections.singletonList(rootFolderId));
+        }
 
         return driveService.files().create(fileMetadata)
                 .setFields("id, webViewLink")
@@ -88,9 +93,7 @@ public class GoogleDriveService {
         File fileMetadata = new File();
         fileMetadata.setName(file.getOriginalFilename());
 
-        // Ważne: parentFolderId nie może być nullem tutaj,
-        // ale zabezpieczyliśmy to w Controllerze.
-        if (parentFolderId != null) {
+        if (parentFolderId != null && !parentFolderId.isBlank()) {
             fileMetadata.setParents(Collections.singletonList(parentFolderId));
         }
 
@@ -101,6 +104,7 @@ public class GoogleDriveService {
                 .setSupportsAllDrives(true)
                 .execute();
     }
+
     public void shareFolder(String folderId, String userEmail, String role) throws IOException {
         // Rola: 'reader' (czytanie), 'writer' (edycja), 'commenter' (komentowanie)
         Permission userPermission = new Permission()
@@ -115,16 +119,11 @@ public class GoogleDriveService {
                     .setSupportsAllDrives(true)
                     .execute();
         } catch (Exception e) {
-            // Ignorujemy błąd, jeśli użytkownik już ma dostęp, lub logujemy go
             System.err.println("Nie udało się udostępnić folderu dla: " + userEmail + ". Błąd: " + e.getMessage());
         }
     }
 
-    // Metoda zabierająca dostęp
     public void unshareFolder(String folderId, String userEmail) throws IOException {
-        // Google Drive API wymaga permissionId, aby usunąć uprawnienie.
-        // Musimy najpierw znaleźć ID uprawnienia dla danego maila.
-
         var permissions = driveService.permissions().list(folderId)
                 .setFields("permissions(id, emailAddress)")
                 .execute()
@@ -135,7 +134,7 @@ public class GoogleDriveService {
                 driveService.permissions().delete(folderId, p.getId())
                         .setSupportsAllDrives(true)
                         .execute();
-                break; // Znaleziono i usunięto
+                break;
             }
         }
     }
@@ -146,11 +145,10 @@ public class GoogleDriveService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Użytkownik o ID " + userId + " nie istnieje"));
 
-            // poki co nie ma odzwierciedlenia tego ze role moga robic to samo na dysku co w apce
             Set<String> writerRoles = Set.of("ADMIN", "CAN_EDIT", "CAN_DELETE", "CAN_CREATE");
             String driveRole;
 
-            if(projectPermissions!=null) {
+            if(projectPermissions != null && !projectPermissions.isEmpty()) {
                 driveRole = (!Collections.disjoint(writerRoles, projectPermissions)) ? "writer" : "reader";
             }
             else{
@@ -166,11 +164,11 @@ public class GoogleDriveService {
     }
 
     public void removeUserFromDriveFiles(Long projectId, Long userId) {
-        Project project = projectRepository.findById(projectId).orElseThrow();
-        User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("Użytkownik o ID " + userId + " nie istnieje"));
-
         try {
+            Project project = projectRepository.findById(projectId).orElseThrow();
+            User user = userRepository.findById(userId)
+                    .orElseThrow(() -> new RuntimeException("Użytkownik o ID " + userId + " nie istnieje"));
+
             if (project.getDriveFolderId() != null) {
                 unshareFolder(project.getDriveFolderId(), user.getEmail());
             }
