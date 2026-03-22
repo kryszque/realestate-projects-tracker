@@ -139,9 +139,15 @@ public class ItemService {
     @CheckAccess(ProjectPermissions.CAN_DELETE)
     @Transactional
     public Item archiveItem(@ProjectId Long projectId, Long pillarId, Long id){
-        Item archivedItem = getItemById(projectId, pillarId, id);
-        archivedItem.setState("archived");
-        return itemRepository.save(archivedItem);
+        Item archivedItem = getItemById(projectId, pillarId, id); //
+
+        // Dodanie prefiksu do nazwy, jeśli jeszcze go nie ma
+        if (!archivedItem.getName().startsWith("[zarchiwizowany]")) {
+            archivedItem.setName("[zarchiwizowany] " + archivedItem.getName());
+        }
+
+        archivedItem.setState("archived"); //
+        return itemRepository.save(archivedItem); //
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)

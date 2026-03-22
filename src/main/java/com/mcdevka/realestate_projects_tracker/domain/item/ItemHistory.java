@@ -26,6 +26,8 @@ public class ItemHistory {
 
     private String webViewLink; // <-- ZMIANA: Bardziej precyzyjny (to jest link do podglądu)
 
+    private String fileName;
+
     private String googleFileId;
 
     @Column(columnDefinition = "TEXT")

@@ -162,9 +162,15 @@ public class PillarService {
 
     @CheckAccess(ProjectPermissions.CAN_DELETE)
     public Pillar archivePillar(@ProjectId Long projectId, Long pillarId){
-        Pillar archivedPillar = validateProjectId(projectId, pillarId);
-        archivedPillar.setState("archived");
-        return pillarRepository.save(archivedPillar);
+        Pillar archivedPillar = validateProjectId(projectId, pillarId); //
+
+        // Dodanie prefiksu do nazwy
+        if (!archivedPillar.getName().startsWith("[zarchiwizowany]")) {
+            archivedPillar.setName("[zarchiwizowany] " + archivedPillar.getName());
+        }
+
+        archivedPillar.setState("archived"); //
+        return pillarRepository.save(archivedPillar); //
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)

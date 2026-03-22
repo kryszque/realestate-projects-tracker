@@ -166,9 +166,15 @@ public class ProjectService {
 
     @CheckAccess(ProjectPermissions.CAN_DELETE)
     public Project archiveProject(@ProjectId Long id){
-        Project archivedProject = getProjectById(id);
-        archivedProject.setState("archived");
-        return projectRepository.save(archivedProject);
+        Project archivedProject = getProjectById(id); //
+
+        // Dodanie prefiksu do nazwy
+        if (!archivedProject.getName().startsWith("[zarchiwizowany]")) {
+            archivedProject.setName("[zarchiwizowany] " + archivedProject.getName());
+        }
+
+        archivedProject.setState("archived"); //
+        return projectRepository.save(archivedProject); //
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)
