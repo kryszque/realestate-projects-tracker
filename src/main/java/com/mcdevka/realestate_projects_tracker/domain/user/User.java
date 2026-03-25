@@ -42,6 +42,8 @@ public class User implements UserDetails {
             inverseJoinColumns = @JoinColumn(name = "company_id") // Klucz firmy
     )
     private Set<Company> companies = new HashSet<>();
+    @Column(name = "google_drive_email")
+    private String googleDriveEmail;
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {

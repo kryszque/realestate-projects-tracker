@@ -9,6 +9,7 @@ import com.google.api.services.drive.DriveScopes;
 import com.google.api.services.drive.model.File;
 import com.google.auth.http.HttpCredentialsAdapter;
 import com.google.auth.oauth2.GoogleCredentials;
+import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
 import com.mcdevka.realestate_projects_tracker.domain.project.ProjectRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.access.ProjectPermissions;
@@ -66,8 +67,7 @@ public class GoogleDriveService {
         fileMetadata.setName(folderName);
         fileMetadata.setMimeType("application/vnd.google-apps.folder");
 
-        // 🔴 POPRAWKA: Sprawdzamy czy parentId istnieje.
-        // Jeśli nie, wrzucamy do głównego folderu konfiguracyjnego (rootFolderId)
+
         if (parentId != null && !parentId.isBlank()) {
             fileMetadata.setParents(Collections.singletonList(parentId));
         } else if (rootFolderId != null && !rootFolderId.isBlank()) {
@@ -145,18 +145,22 @@ public class GoogleDriveService {
             User user = userRepository.findById(userId)
                     .orElseThrow(() -> new RuntimeException("Użytkownik o ID " + userId + " nie istnieje"));
 
-            Set<String> writerRoles = Set.of("ADMIN", "CAN_EDIT", "CAN_DELETE", "CAN_CREATE");
-            String driveRole;
+            boolean hasWriterAccess = false;
 
-            if(projectPermissions != null && !projectPermissions.isEmpty()) {
-                driveRole = (!Collections.disjoint(writerRoles, projectPermissions)) ? "writer" : "reader";
+            if (projectPermissions != null && !projectPermissions.isEmpty()) {
+                hasWriterAccess = projectPermissions.contains(ProjectPermissions.ADMIN) ||
+                        projectPermissions.contains(ProjectPermissions.CAN_EDIT) ||
+                        projectPermissions.contains(ProjectPermissions.CAN_CREATE) ||
+                        projectPermissions.contains(ProjectPermissions.CAN_DELETE);
+            } else if (userRole != null) {
+                Set<String> writerRoles = Set.of("ADMIN", "CAN_EDIT", "CAN_DELETE", "CAN_CREATE");
+                hasWriterAccess = writerRoles.contains(userRole);
             }
-            else{
-                driveRole = (writerRoles.contains(userRole)) ? "writer" : "reader";
-            }
+
+            String driveRole = hasWriterAccess ? "writer" : "reader";
 
             if (project.getDriveFolderId() != null) {
-                shareFolder(project.getDriveFolderId(), user.getEmail(), driveRole);
+                shareFolder(project.getDriveFolderId(), user.getGoogleDriveEmail(), driveRole);
             }
         } catch (Exception e) {
             System.err.println("Błąd synchronizacji z Google Drive: " + e.getMessage());
@@ -170,10 +174,30 @@ public class GoogleDriveService {
                     .orElseThrow(() -> new RuntimeException("Użytkownik o ID " + userId + " nie istnieje"));
 
             if (project.getDriveFolderId() != null) {
-                unshareFolder(project.getDriveFolderId(), user.getEmail());
+                unshareFolder(project.getDriveFolderId(), user.getGoogleDriveEmail());
             }
         } catch (Exception e) {
             System.err.println("Błąd usuwania dostępu z Google Drive: " + e.getMessage());
+        }
+    }
+
+    public void assignUserToCompanyFolder(Company company, String userEmail, String role) {
+        if (company.getDriveFolderId() != null) {
+            try {
+                shareFolder(company.getDriveFolderId(), userEmail, role);
+            } catch (Exception e) {
+                System.err.println("Błąd nadawania dostępu do folderu firmy: " + e.getMessage());
+            }
+        }
+    }
+
+    public void removeUserFromCompanyFolder(Company company, String userEmail) {
+        if (company.getDriveFolderId() != null) {
+            try {
+                unshareFolder(company.getDriveFolderId(), userEmail);
+            } catch (Exception e) {
+                System.err.println("Błąd usuwania dostępu z folderu firmy: " + e.getMessage());
+            }
         }
     }
 }

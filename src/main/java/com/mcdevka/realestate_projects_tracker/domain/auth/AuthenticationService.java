@@ -28,6 +28,9 @@ public class AuthenticationService {
                 .email(request.email())
                 .password(passwordEncoder.encode(request.password()))
                 .role(Role.USER)
+                .googleDriveEmail(request.googleDriveEmail() != null && !request.googleDriveEmail().isBlank()
+                        ? request.googleDriveEmail()
+                        : request.email())
                 .build();
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);

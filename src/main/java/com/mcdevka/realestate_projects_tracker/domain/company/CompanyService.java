@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.company;
 
 import com.mcdevka.realestate_projects_tracker.domain.user.Role;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
+import com.mcdevka.realestate_projects_tracker.infrastructure.drive.GoogleDriveService;
 import com.mcdevka.realestate_projects_tracker.security.AccessControlService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -14,6 +15,7 @@ public class CompanyService {
 
     private final CompanyRepository companyRepository;
     private final AccessControlService accessControlService;
+    private final GoogleDriveService googleDriveService;
 
     public List<Company> getAllCompanies() {return companyRepository.findAll();}
 
@@ -32,6 +34,15 @@ public class CompanyService {
 
         Company createdCompany = new Company();
         createdCompany.setName(inputCompany.getName());
+
+        try {
+            com.google.api.services.drive.model.File companyFolder =
+                    googleDriveService.createFolder(createdCompany.getName(), null);
+            createdCompany.setDriveFolderId(companyFolder.getId());
+            createdCompany.setDriveFolderLink(companyFolder.getWebViewLink());
+        } catch (Exception e) {
+            System.err.println("Nie udało się utworzyć folderu na Dysku Google dla firmy: " + e.getMessage());
+        }
 
         return companyRepository.save(createdCompany);
     }

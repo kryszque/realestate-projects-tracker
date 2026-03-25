@@ -60,8 +60,18 @@ public class AdminService {
         // 3. Znajdź wszystkie firmy pasujące do tych ID
         List<Company> companiesToAssign = companyRepository.findAllById(ids);
 
-        // 4. WAŻNE: Nadpisz listę firm użytkownika
-        // Używamy Set (HashSet), aby uniknąć duplikatów
+        for (Long oldCompId : exclusiveOldCompaniesIds) {
+            Company oldCompany = companyRepository.findById(oldCompId).orElse(null);
+            if (oldCompany != null) {
+                googleDriveService.removeUserFromCompanyFolder(oldCompany, user.getEmail());
+            }
+        }
+
+        for (Company newCompany : companiesToAssign) {
+            if (!user.getCompanies().contains(newCompany)) {
+                googleDriveService.assignUserToCompanyFolder(newCompany, user.getEmail(), "reader");
+            }
+        }
         user.setCompanies(new HashSet<>(companiesToAssign));
 
         // 5. Zapisz użytkownika (Hibernate zaktualizuje tabelę user_companies)
@@ -100,7 +110,7 @@ public class AdminService {
 
         access.setPermissions(new HashSet<>(grantedPermissions));
         if(grantedPermissions.isEmpty()) {
-            googleDriveService.removeUserFromDriveFiles(user.getId(), project.getId());
+            googleDriveService.removeUserFromDriveFiles(project.getId(), user.getId());
         }
         else{
             googleDriveService.assignUserToDriveFiles(project.getId(), user.getId(), null, grantedPermissions);

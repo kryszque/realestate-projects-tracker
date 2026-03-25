@@ -46,6 +46,7 @@ public class UserService {
         return new UserDetail(
                 user.getId(),
                 user.getEmail(),
+                user.getGoogleDriveEmail(),
                 user.getFirstname(),
                 user.getLastname(),
                 user.getRole().name(),
@@ -79,6 +80,10 @@ public class UserService {
         }
         if (requestData.getLastname() != null && !requestData.getLastname().isBlank()) {
             userFromDb.setLastname(requestData.getLastname());
+        }
+
+        if (requestData.getGoogleDriveEmail() != null && !requestData.getGoogleDriveEmail().isBlank()) {
+            userFromDb.setGoogleDriveEmail(requestData.getGoogleDriveEmail());
         }
 
         // 4. Zapisujemy zmiany
