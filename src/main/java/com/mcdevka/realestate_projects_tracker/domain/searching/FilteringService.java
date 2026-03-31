@@ -16,46 +16,50 @@ import java.util.stream.Collectors;
 public class FilteringService {
 
     public GlobalSearchingResultDTO filterSearch(GlobalSearchingResultDTO sourceData, FilteringCriteria criteria) {
-
         List<Project> projects = criteria.isFilterByProject() ? sourceData.projects() : Collections.emptyList();
         List<Pillar> pillars = criteria.isFilterByPillar() ? sourceData.pillars() : Collections.emptyList();
         List<Item> items = criteria.isFilterByItem() ? sourceData.items() : Collections.emptyList();
 
-        if (!CollectionUtils.isEmpty(criteria.getFilteredTagsNames()) || criteria.getFilteredPriority() != null || criteria.getCompanyId() != null) {
-            projects = filterProjects(projects, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId());
-            pillars = filterPillars(pillars, criteria.getFilteredTagsNames(),  criteria.getFilteredPriority(), criteria.getCompanyId());
-            items = filterItems(items, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId());
+        if (!CollectionUtils.isEmpty(criteria.getFilteredTagsNames()) ||
+                criteria.getFilteredPriority() != null ||
+                criteria.getCompanyId() != null ||
+                !CollectionUtils.isEmpty(criteria.getFilteredStates())) {
+
+            projects = filterProjects(projects, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId(), criteria.getFilteredStates());
+            pillars = filterPillars(pillars, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId(), criteria.getFilteredStates());
+            items = filterItems(items, criteria.getFilteredTagsNames(), criteria.getFilteredPriority(), criteria.getCompanyId(), criteria.getFilteredStates());
         }
 
         return new GlobalSearchingResultDTO(projects, pillars, items);
     }
 
-    private List<Item> filterItems(List<Item> items, List<String> tagNamesToFind, Integer filteredPriority, Long companyId) {
+    private List<Item> filterItems(List<Item> items, List<String> tagNamesToFind, Integer filteredPriority, Long companyId, List<String> filteredStates) {
         if (CollectionUtils.isEmpty(items)) return items;
         return items.stream()
                 .filter(item -> containsAllTags(item.getTags(), tagNamesToFind))
                 .filter(item -> matchesPriority(item.getPriority(), filteredPriority))
                 .filter(item -> matchesCompany(item.getCompany() != null ? item.getCompany().getId() : null, companyId))
+                .filter(item -> matchesState(item.getState(), filteredStates)) // 👇 NOWY FILTR
                 .collect(Collectors.toList());
     }
 
-    private List<Project> filterProjects(List<Project> projects, List<String> tagNamesToFind,
-                                         Integer filteredPriority, Long companyId) {
+    private List<Project> filterProjects(List<Project> projects, List<String> tagNamesToFind, Integer filteredPriority, Long companyId, List<String> filteredStates) {
         if (CollectionUtils.isEmpty(projects)) return projects;
         return projects.stream()
                 .filter(project -> containsAllTags(project.getTags(), tagNamesToFind))
                 .filter(project -> matchesPriority(project.getPriority(),filteredPriority))
                 .filter(project -> matchesCompany(project.getCompany() != null ? project.getCompany().getId() : null, companyId))
+                .filter(project -> matchesState(project.getState(), filteredStates)) // 👇 NOWY FILTR
                 .collect(Collectors.toList());
     }
 
-    private List<Pillar> filterPillars(List<Pillar> pillars, List<String> tagNamesToFind,
-                                       Integer filteredPriority, Long companyId) {
+    private List<Pillar> filterPillars(List<Pillar> pillars, List<String> tagNamesToFind, Integer filteredPriority, Long companyId, List<String> filteredStates) {
         if (CollectionUtils.isEmpty(pillars)) return pillars;
         return pillars.stream()
                 .filter(pillar -> containsAllTags(pillar.getTags(), tagNamesToFind))
                 .filter(pillar -> matchesPriority(pillar.getPriority(),filteredPriority))
                 .filter(pillar -> matchesCompany(pillar.getCompany() != null ? pillar.getCompany().getId() : null, companyId))
+                .filter(pillar -> matchesState(pillar.getState(), filteredStates)) // 👇 NOWY FILTR
                 .collect(Collectors.toList());
     }
 
@@ -89,5 +93,14 @@ public class FilteringService {
         }
 
         return itemCompany != null && itemCompany.equals(filteredCompany);
+    }
+
+    private boolean matchesState(String state, List<String> filteredStates) {
+        String safeState = state != null ? state : "active";
+        if (CollectionUtils.isEmpty(filteredStates)) {
+            return !"archived".equals(safeState);
+        }
+
+        return filteredStates.contains(safeState);
     }
 }

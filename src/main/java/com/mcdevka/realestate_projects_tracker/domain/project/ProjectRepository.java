@@ -23,9 +23,8 @@ public interface ProjectRepository extends JpaRepository<Project, Long>, JpaSpec
             Company company,
             Integer priority
     );
-    List<Project> findByStateNot(String state);
     // Znajdź projekty należące do jednej z wielu firm (IN clause)
-    List<Project> findByStateNotAndCompanyIn(String state, Collection<Company> companies);
+    List<Project> findByCompanyIn(Collection<Company> companies);
 
     // Znajdź projekty dla jednej konkretnej firmy (do usuwania uprawnień)
     List<Project> findByStateNotAndCompany(String state, Company company);

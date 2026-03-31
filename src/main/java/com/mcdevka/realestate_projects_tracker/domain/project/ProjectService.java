@@ -45,7 +45,7 @@ public class ProjectService {
         User currentUser = accessControlService.getCurrentUser();
 
         if(currentUser.getRole() == Role.ADMIN){
-            return projectRepository.findByStateNot("archived");
+            return projectRepository.findAll();
         } else {
             Collection<Company> userCompanies = currentUser.getCompanies();
 
@@ -53,7 +53,7 @@ public class ProjectService {
                 return List.of();
             }
 
-            return projectRepository.findByStateNotAndCompanyIn("archived", userCompanies);
+            return projectRepository.findByCompanyIn(userCompanies);
         }
     }
 

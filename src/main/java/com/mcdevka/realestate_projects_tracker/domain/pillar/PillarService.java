@@ -68,7 +68,7 @@ public class PillarService {
 
     @CheckAccess(ProjectPermissions.CAN_VIEW)
     public Pillar getPillarById(@ProjectId Long projectId, Long id){
-        Pillar pillar = pillarRepository.findByIdAndStateNot(id, "archived")
+        Pillar pillar = pillarRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pillar with id " + id + " not found!"));
         if (!pillar.getProject().getId().equals(projectId)) {
             throw new IllegalArgumentException("Pillar with ID " + id + " is not in pillar/project path");

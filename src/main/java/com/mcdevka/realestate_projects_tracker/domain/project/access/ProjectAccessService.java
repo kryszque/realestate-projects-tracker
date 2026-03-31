@@ -59,7 +59,7 @@ public class ProjectAccessService {
         }
 
         // ZMIANA: Pobieramy projekty dla WSZYSTKICH firm użytkownika
-        List<Project> projects = projectRepository.findByStateNotAndCompanyIn("archived", userCompanies);
+        List<Project> projects = projectRepository.findByCompanyIn(userCompanies);
 
         for(Project project : projects){
             assignViewPermission(user, project);

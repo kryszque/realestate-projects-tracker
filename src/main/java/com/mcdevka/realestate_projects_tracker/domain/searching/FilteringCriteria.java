@@ -13,4 +13,5 @@ public class FilteringCriteria {
     private Integer filteredPriority;
 
     private Long companyId;
+    private List<String> filteredStates;
 }

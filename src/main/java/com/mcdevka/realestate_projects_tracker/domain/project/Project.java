@@ -57,7 +57,6 @@ public class Project {
             orphanRemoval = true
     )
     @JsonIgnoreProperties("project")
-    @Where(clause = "state != 'archived'")
     private List<Pillar> pillars;
     private String driveFolderId;
     private String driveFolderLink;
