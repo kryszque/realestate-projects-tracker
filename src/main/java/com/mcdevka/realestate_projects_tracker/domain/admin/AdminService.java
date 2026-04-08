@@ -55,21 +55,29 @@ public class AdminService {
         List<Long> exclusiveOldCompaniesIds = new ArrayList<>(oldCompaniesIds);
         exclusiveOldCompaniesIds.removeAll(ids);
 
-        List<Long> exclusiveOldCompaniesProjectsIds = projectRepository.findProjectIdsByCompanyIds(exclusiveOldCompaniesIds);
-
+        List<Long> exclusiveOldCompaniesProjectsIds = new ArrayList<>();
+        if (!exclusiveOldCompaniesIds.isEmpty()) {
+            exclusiveOldCompaniesProjectsIds = projectRepository.findProjectIdsByCompanyIds(exclusiveOldCompaniesIds);
+        }
         // 3. Znajdź wszystkie firmy pasujące do tych ID
         List<Company> companiesToAssign = companyRepository.findAllById(ids);
 
         for (Long oldCompId : exclusiveOldCompaniesIds) {
             Company oldCompany = companyRepository.findById(oldCompId).orElse(null);
             if (oldCompany != null) {
-                googleDriveService.removeUserFromCompanyFolder(oldCompany, user.getEmail());
+                googleDriveService.removeUserFromCompanyFolder(oldCompany, user.getGoogleDriveEmail());
+            }
+        }
+
+        if (exclusiveOldCompaniesProjectsIds != null && !exclusiveOldCompaniesProjectsIds.isEmpty()) {
+            for (Long projId : exclusiveOldCompaniesProjectsIds) {
+                googleDriveService.removeUserFromDriveFiles(projId, user.getId());
             }
         }
 
         for (Company newCompany : companiesToAssign) {
             if (!user.getCompanies().contains(newCompany)) {
-                googleDriveService.assignUserToCompanyFolder(newCompany, user.getEmail(), "reader");
+                googleDriveService.assignUserToCompanyFolder(newCompany, user.getGoogleDriveEmail(), "reader");
             }
         }
         user.setCompanies(new HashSet<>(companiesToAssign));

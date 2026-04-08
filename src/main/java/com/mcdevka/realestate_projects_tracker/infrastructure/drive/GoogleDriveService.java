@@ -126,14 +126,19 @@ public class GoogleDriveService {
     public void unshareFolder(String folderId, String userEmail) throws IOException {
         var permissions = driveService.permissions().list(folderId)
                 .setFields("permissions(id, emailAddress)")
+                .setSupportsAllDrives(true)
                 .execute()
                 .getPermissions();
 
         for (Permission p : permissions) {
-            if (userEmail.equalsIgnoreCase(p.getEmailAddress())) {
-                driveService.permissions().delete(folderId, p.getId())
-                        .setSupportsAllDrives(true)
-                        .execute();
+            if (p.getEmailAddress() != null && p.getEmailAddress().equalsIgnoreCase(userEmail)) {
+                try {
+                    driveService.permissions().delete(folderId, p.getId())
+                            .setSupportsAllDrives(true)
+                            .execute();
+                } catch (Exception e) {
+                    System.err.println("Nie udało się usunąć uprawnienia z Dysku: " + e.getMessage());
+                }
                 break;
             }
         }
