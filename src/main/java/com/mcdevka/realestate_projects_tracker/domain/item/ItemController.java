@@ -226,4 +226,17 @@ public class ItemController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
+    @PutMapping("/{itemId}/unarchive")
+    public ResponseEntity<Item> unarchiveItem(
+            @PathVariable Long projectId,
+            @PathVariable Long pillarId,
+            @PathVariable Long itemId) {
+        try {
+            Item unarchivedItem = itemService.unarchiveItem(projectId, pillarId, itemId);
+            return ResponseEntity.ok(unarchivedItem);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

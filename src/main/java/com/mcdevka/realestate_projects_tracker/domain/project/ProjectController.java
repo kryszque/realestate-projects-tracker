@@ -105,4 +105,14 @@ public class ProjectController {
         List<ItemHistory> pinned = itemService.getPinnedHistoryForProject(projectId);
         return ResponseEntity.ok(pinned);
     }
+
+    @PutMapping("/{projectId}/unarchive")
+    public ResponseEntity<Project> unarchiveProject(@PathVariable Long projectId) {
+        try {
+            Project unarchivedProject = projectService.unarchiveProject(projectId);
+            return ResponseEntity.ok(unarchivedProject);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

@@ -220,4 +220,17 @@ public class PillarService {
         return pillarRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Pillar with ID " + id + " does not exist!"));
     }
+
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Pillar unarchivePillar(@ProjectId Long projectId, Long pillarId){
+        Pillar pillar = validateProjectId(projectId, pillarId);
+
+        // Usuń prefiks, jeśli istnieje
+        if (pillar.getName().startsWith("[zarchiwizowany] ")) {
+            pillar.setName(pillar.getName().replaceFirst("\\[zarchiwizowany\\] ", ""));
+        }
+
+        pillar.setState("active");
+        return pillarRepository.save(pillar);
+    }
 }

@@ -114,4 +114,16 @@ public class PillarController {
         List<ItemHistory> pinned = itemService.getPinnedHistoryForPillar(pillarId);
         return ResponseEntity.ok(pinned);
     }
+
+    @PutMapping("/{id}/unarchive")
+    public ResponseEntity<Pillar> unarchivePillar(
+            @PathVariable Long projectId,
+            @PathVariable Long id) {
+        try {
+            Pillar unarchivedPillar = pillarService.unarchivePillar(projectId, id);
+            return ResponseEntity.ok(unarchivedPillar);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
 }

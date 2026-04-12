@@ -237,4 +237,17 @@ public class ProjectService {
             throw new IllegalArgumentException("A Project must be associated with a Company. Company is required.");
         }
     }
+
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    public Project unarchiveProject(@ProjectId Long id) {
+        Project project = getProjectById(id);
+
+        // Usuń prefiks, jeśli istnieje
+        if (project.getName().startsWith("[zarchiwizowany] ")) {
+            project.setName(project.getName().replaceFirst("\\[zarchiwizowany\\] ", ""));
+        }
+
+        project.setState("active"); // Zmiana stanu na aktywny
+        return projectRepository.save(project);
+    }
 }

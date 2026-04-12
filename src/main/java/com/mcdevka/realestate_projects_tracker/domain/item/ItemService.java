@@ -206,10 +206,13 @@ public class ItemService {
         ItemHistory prevHistory = getItemHistoryById(itemId, id).get();
 
         prevHistory.setDescription(itemHistory.getDescription());
-        prevHistory.setGoogleFileId(itemHistory.getGoogleFileId());
-        prevHistory.setWebViewLink(itemHistory.getWebViewLink());
         prevHistory.setAuthor(itemHistory.getAuthor());
         prevHistory.setEdited(true);
+
+        if (itemHistory.getGoogleFileId() != null) {
+            prevHistory.setGoogleFileId(itemHistory.getGoogleFileId());
+            prevHistory.setWebViewLink(itemHistory.getWebViewLink());
+        }
 
         if (itemHistory.getReplyToId() != null) {
             // Szukamy nowej wiadomości-matki po ID (Long -> ItemHistory)
@@ -331,5 +334,18 @@ public class ItemService {
     @Transactional(readOnly = true)
     public List<ItemHistory> getPinnedHistoryForPillar(Long pillarId) {
         return itemRepository.findPinnedByPillarId(pillarId);
+    }
+
+    @CheckAccess(ProjectPermissions.CAN_EDIT)
+    @Transactional
+    public Item unarchiveItem(@ProjectId Long projectId, Long pillarId, Long id){
+        Item item = getItemById(projectId, pillarId, id);
+
+        if (item.getName().startsWith("[zarchiwizowany] ")) {
+            item.setName(item.getName().replaceFirst("\\[zarchiwizowany\\] ", ""));
+        }
+
+        item.setState("active");
+        return itemRepository.save(item);
     }
 }
