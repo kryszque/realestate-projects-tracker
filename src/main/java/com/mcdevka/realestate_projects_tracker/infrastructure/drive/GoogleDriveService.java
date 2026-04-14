@@ -205,4 +205,39 @@ public class GoogleDriveService {
             }
         }
     }
+
+    public void changeFolderName(String folderId, String newFolderName) {
+        if (folderId == null || folderId.isBlank()) return;
+
+        try {
+            com.google.api.services.drive.model.File fileMetadata = new com.google.api.services.drive.model.File();
+            fileMetadata.setName(newFolderName);
+
+            driveService.files().update(folderId, fileMetadata)
+                    .setSupportsAllDrives(true)
+                    .execute();
+
+            System.out.println("Zmieniono nazwę folderu na Dysku o ID " + folderId + " na: " + newFolderName);
+        } catch (Exception e) {
+            System.err.println("Błąd podczas zmiany nazwy folderu na Dysku: " + e.getMessage());
+        }
+    }
+
+
+    public void moveFolder(String fileId, String oldParentId, String newParentId) {
+        if (fileId == null || oldParentId == null || newParentId == null) return;
+
+        try {
+            driveService.files().update(fileId, null)
+                    .setAddParents(newParentId)
+                    .setRemoveParents(oldParentId)
+                    .setFields("id, parents")
+                    .setSupportsAllDrives(true)
+                    .execute();
+
+            System.out.println("Przeniesiono folder " + fileId + " z " + oldParentId + " do " + newParentId);
+        } catch (IOException e) {
+            System.err.println("Błąd podczas przenoszenia folderu na Dysku Google: " + e.getMessage());
+        }
+    }
 }

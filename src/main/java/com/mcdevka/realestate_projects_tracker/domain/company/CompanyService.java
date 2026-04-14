@@ -51,7 +51,14 @@ public class CompanyService {
         Company company = companyRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Company not found"));
 
+        String oldName = company.getName();
+        String newName = inputCompany.getName();
+
         company.setName(inputCompany.getName());
+
+        if (!oldName.equals(newName) && company.getDriveFolderId() != null) {
+            googleDriveService.changeFolderName(company.getDriveFolderId(), newName);
+        }
 
         return companyRepository.save(company);
     }

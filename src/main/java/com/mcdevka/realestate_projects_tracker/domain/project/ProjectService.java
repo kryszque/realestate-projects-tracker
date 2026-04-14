@@ -136,6 +136,9 @@ public class ProjectService {
 
         Company oldCompany = existingProject.getCompany();
 
+        String oldName = existingProject.getName();
+        String newName = updatedProjectData.getName();
+
         setChangableFields(updatedProjectData, existingProject);
 
         Company newCompany = existingProject.getCompany();
@@ -155,12 +158,25 @@ public class ProjectService {
 
         Project savedProject = projectRepository.save(existingProject);
 
-        if (!Objects.equals(oldCompany, newCompany)) {
+        if (!Objects.equals(oldCompany.getId(), newCompany.getId())) {
             pillarRepository.updateCompanyForProject(id, newCompany);
             itemRepository.updateCompanyForProject(id, newCompany);
+
+            if (existingProject.getDriveFolderId() != null) {
+                String newParentId = newCompany.getDriveFolderId();
+                String oldParentId = oldCompany.getDriveFolderId();
+
+                if (oldParentId != null && newParentId != null) {
+                    googleDriveService.moveFolder(existingProject.getDriveFolderId(), oldParentId, newParentId);
+                }
+            }
         }
 
         projectAccessService.assignDefaultPermissionOnProjectCreation(existingProject);
+
+        if (!oldName.equals(newName) && existingProject.getDriveFolderId() != null) {
+            googleDriveService.changeFolderName(existingProject.getDriveFolderId(), newName);
+        }
         return savedProject;
     }
 

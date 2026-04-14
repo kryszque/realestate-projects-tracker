@@ -139,6 +139,9 @@ public class PillarService {
         String inputName = inputPillar.getName();
 
         Pillar updatedPillar = validateProjectId(projectId, pillarId);
+
+        String oldName = updatedPillar.getName();
+
         updatedPillar.setName(inputName);
         updatedPillar.setPriority(inputPillar.getPriority());
         updatedPillar.setDeadline(inputPillar.getDeadline());
@@ -155,6 +158,10 @@ public class PillarService {
             }
 
             updatedPillar.setTags(updatedTags);
+        }
+
+        if (!oldName.equals(inputName) && updatedPillar.getDriveFolderId() != null) {
+            googleDriveService.changeFolderName(updatedPillar.getDriveFolderId(), inputName);
         }
 
         return pillarRepository.save(updatedPillar);

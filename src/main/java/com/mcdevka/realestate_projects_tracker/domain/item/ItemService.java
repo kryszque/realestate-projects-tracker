@@ -117,6 +117,9 @@ public class ItemService {
     public Item updateItem(@ProjectId Long projectId, Long pillarId, Long itemId, Item updatedItem) {
         Item existingItem = getItemById(projectId, pillarId, itemId);
 
+        String oldName = existingItem.getName();
+        String newName = updatedItem.getName();
+
         setChangableFields(updatedItem, existingItem);
 
         if (updatedItem.getTags() != null) {
@@ -131,6 +134,10 @@ public class ItemService {
             }
 
             existingItem.setTags(updatedTags);
+        }
+
+        if (!oldName.equals(newName) && existingItem.getDriveFolderId() != null) {
+            googleDriveService.changeFolderName(existingItem.getDriveFolderId(), newName);
         }
 
         return itemRepository.save(existingItem);
