@@ -66,7 +66,7 @@ public class AdminInitializer implements CommandLineRunner {
             grantAdminPermissions();
             System.out.println("Admin has been created");
         } else {
-            System.out.println("Admin has already been created!!!!!");
+            System.out.println("Admin has already been created");
             grantAdminPermissions();
         }
     }
