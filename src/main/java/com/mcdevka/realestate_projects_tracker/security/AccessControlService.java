@@ -32,21 +32,22 @@ public class AccessControlService {
         }
 
         if(currentUser.getCompanies() == null || currentUser.getCompanies().isEmpty()){
-            throw new SecurityException("You are not assigned to any company!");
+            throw new SecurityException("Nie jesteś przypisany do żadnej firmy.");
         }
 
+        // Zwróć uwagę, że tu rzucamy IllegalArgumentException, żeby poleciał status 400 zamiast 403 (brak dostępu)
         Project project = projectRepository.findById(projectId)
-                .orElseThrow(() -> new SecurityException("Project with id " + projectId + " does not exist!"));
+                .orElseThrow(() -> new IllegalArgumentException("Projekt o podanym ID nie istnieje."));
 
         if(!currentUser.getCompanies().contains(project.getCompany())){
-            throw new SecurityException("This project isn't assigned to any of your companies!");
+            throw new SecurityException("Ten projekt nie jest przypisany do żadnej z Twoich firm.");
         }
 
-        ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(currentUser.getId(),
-                projectId).orElseThrow(() -> new SecurityException("You don't have access to this project!"));
+        ProjectAccess access = projectAccessRepository.findByUserIdAndProjectId(currentUser.getId(), projectId)
+                .orElseThrow(() -> new SecurityException("Nie masz przypisanego dostępu do tego projektu."));
 
         if(!access.getPermissions().contains(requiredPermission)){
-            throw new SecurityException("You don't have permission to do this action! You need " + requiredPermission);
+            throw new SecurityException("Brak uprawnień. Do wykonania tej akcji wymagane jest uprawnienie: " + requiredPermission.name());
         }
     }
 
@@ -55,6 +56,6 @@ public class AccessControlService {
         if(currentUser.getRole() == Role.ADMIN) {
             return;
         }
-        throw new SecurityException("You don't have permission to perform this action!");
+        throw new SecurityException("Brak uprawnień do wykonania tej operacji.");
     }
 }
