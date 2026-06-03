@@ -31,6 +31,8 @@ public class AuthenticationService {
                 .googleDriveEmail(request.googleDriveEmail() != null && !request.googleDriveEmail().isBlank()
                         ? request.googleDriveEmail()
                         : request.email())
+                .canCreateProjects(request.canCreateProjects())
+                .canDeleteProjects(request.canDeleteProjects())
                 .build();
         userRepository.save(user);
         var jwtToken = jwtService.generateToken(user);

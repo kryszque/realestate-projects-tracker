@@ -51,7 +51,9 @@ public class UserService {
                 user.getLastname(),
                 user.getRole().name(),
                 companyNames, // <--- Tutaj przekazujemy listę zamiast pojedynczego stringa
-                projects
+                projects,
+                user.isCanCreateProjects(),
+                user.isCanDeleteProjects()
         );
     }
 

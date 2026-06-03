@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.admin;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.AssignCompanyRequest;
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.GrantPermissionsRequest;
+import com.mcdevka.realestate_projects_tracker.domain.admin.dto.UpdateUserRequest;
 import com.mcdevka.realestate_projects_tracker.domain.user.User;
 import com.mcdevka.realestate_projects_tracker.domain.user.UserService;
 import com.mcdevka.realestate_projects_tracker.domain.user.dto.UserDetail;
@@ -75,6 +76,17 @@ public class AdminController {
             UserDetail userDetail = userService.getUserDetails(userId);
             return ResponseEntity.ok(userDetail);
         } catch (IllegalArgumentException e){
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+    }
+
+    @PutMapping("/users/{userId}")
+    public ResponseEntity<Void> updateUserDetails(@PathVariable long userId,
+                                                  @RequestBody UpdateUserRequest request) {
+        try {
+            adminService.updateUserDetails(userId, request);
+            return ResponseEntity.ok().build();
+        } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }

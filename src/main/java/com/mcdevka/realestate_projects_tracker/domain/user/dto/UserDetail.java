@@ -7,4 +7,6 @@ public record UserDetail(Long id, String email, String googleDriveEmail,
                          String lastName,
                          String role,
                          List<String> companies,
-                         List<UserProject> assignedProjects) { }
+                         List<UserProject> assignedProjects,
+                         boolean canCreateProjects,
+                         boolean canDeleteProjects) { }

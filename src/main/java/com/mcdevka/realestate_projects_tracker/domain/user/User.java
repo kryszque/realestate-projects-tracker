@@ -45,6 +45,11 @@ public class User implements UserDetails {
     @Column(name = "google_drive_email")
     private String googleDriveEmail;
 
+    @Column(columnDefinition = "boolean default false")
+    private boolean canCreateProjects;
+    @Column(columnDefinition = "boolean default false")
+    private boolean canDeleteProjects;
+
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return List.of(new SimpleGrantedAuthority(role.name()));

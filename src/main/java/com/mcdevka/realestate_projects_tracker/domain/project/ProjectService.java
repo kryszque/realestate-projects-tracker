@@ -20,7 +20,6 @@ import com.mcdevka.realestate_projects_tracker.security.annotation.ProjectId;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
@@ -63,9 +62,15 @@ public class ProjectService {
                 .orElseThrow(() -> new IllegalArgumentException("Project with ID " + id + " not found!"));
     }
 
-    @CheckAccess(ProjectPermissions.CAN_CREATE)
-    @Transactional // ADDED @Transactional because we are modifying and saving the Company entity now
+    // USUNIĘTO: @CheckAccess(ProjectPermissions.CAN_CREATE)
+    @Transactional
     public Project createProject(Project inputProject){
+        // --- NOWE: Weryfikacja nadrzędnego uprawnienia do TWORZENIA ---
+        User currentUser = accessControlService.getCurrentUser();
+        if (currentUser.getRole() != Role.ADMIN && !currentUser.isCanCreateProjects()) {
+            throw new SecurityException("Brak nadrzędnych uprawnień do tworzenia nowych projektów.");
+        }
+
         validateCompanyPresence(inputProject);
         checkForProjectDuplicates(inputProject);
 
@@ -76,27 +81,23 @@ public class ProjectService {
         createdProject.setState("active");
         createdProject.setPriority(inputProject.getPriority());
 
-        // --- NEW DRIVE HIERARCHY LOGIC ---
-        // 1. Fetch the managed Company entity from the database
+        // --- DRIVE HIERARCHY LOGIC ---
         Company company = companyRepository.findById(inputProject.getCompany().getId())
                 .orElseThrow(() -> new EntityNotFoundException("Company not found"));
 
-        // 2. Check if the Company already has a Drive folder. If not, create it.
         if (company.getDriveFolderId() == null || company.getDriveFolderId().isBlank()) {
             try {
-                // Pass null to create the folder in the configured root directory
                 com.google.api.services.drive.model.File companyFolder =
                         googleDriveService.createFolder(company.getName(), null);
 
                 company.setDriveFolderId(companyFolder.getId());
                 company.setDriveFolderLink(companyFolder.getWebViewLink());
-                companyRepository.save(company); // Save the company with its new folder ID
+                companyRepository.save(company);
             } catch (Exception e) {
                 throw new RuntimeException("Couldn't create drive folder for the company", e);
             }
         }
 
-        // 3. Create the Project folder inside the Company folder
         try {
             com.google.api.services.drive.model.File projectFolder =
                     googleDriveService.createFolder(createdProject.getName(), company.getDriveFolderId());
@@ -106,7 +107,6 @@ public class ProjectService {
         } catch (Exception e) {
             throw new RuntimeException("Couldn't create drive folder for this project", e);
         }
-        // --- END DRIVE HIERARCHY LOGIC ---
 
         createdProject.setPillars(pillarService.initializeDefaultPillars(createdProject));
 
@@ -129,7 +129,6 @@ public class ProjectService {
     @CheckAccess(ProjectPermissions.CAN_EDIT)
     @Transactional
     public Project updateProjectInfo(@ProjectId Long id, Project updatedProjectData) {
-        // --- NEW VALIDATION: Ensure company is provided during update ---
         validateCompanyPresence(updatedProjectData);
 
         Project existingProject = getProjectById(id);
@@ -180,17 +179,22 @@ public class ProjectService {
         return savedProject;
     }
 
-    @CheckAccess(ProjectPermissions.CAN_DELETE)
+    // USUNIĘTO: @CheckAccess(ProjectPermissions.CAN_DELETE)
     public Project archiveProject(@ProjectId Long id){
-        Project archivedProject = getProjectById(id); //
+        // --- NOWE: Weryfikacja nadrzędnego uprawnienia do USUWANIA/ARCHIWIZACJI ---
+        User currentUser = accessControlService.getCurrentUser();
+        if (currentUser.getRole() != Role.ADMIN && !currentUser.isCanDeleteProjects()) {
+            throw new SecurityException("Brak nadrzędnych uprawnień do usuwania (archiwizowania) projektów.");
+        }
 
-        // Dodanie prefiksu do nazwy
+        Project archivedProject = getProjectById(id);
+
         if (!archivedProject.getName().startsWith("[zarchiwizowany]")) {
             archivedProject.setName("[zarchiwizowany] " + archivedProject.getName());
         }
 
-        archivedProject.setState("archived"); //
-        return projectRepository.save(archivedProject); //
+        archivedProject.setState("archived");
+        return projectRepository.save(archivedProject);
     }
 
     @CheckAccess(ProjectPermissions.CAN_EDIT)
@@ -247,7 +251,6 @@ public class ProjectService {
         existingProject.setCompany(inputProject.getCompany());
     }
 
-    // --- NEW HELPER METHOD ---
     private void validateCompanyPresence(Project project) {
         if (project.getCompany() == null || project.getCompany().getId() == null) {
             throw new IllegalArgumentException("A Project must be associated with a Company. Company is required.");
@@ -258,12 +261,11 @@ public class ProjectService {
     public Project unarchiveProject(@ProjectId Long id) {
         Project project = getProjectById(id);
 
-        // Usuń prefiks, jeśli istnieje
         if (project.getName().startsWith("[zarchiwizowany] ")) {
             project.setName(project.getName().replaceFirst("\\[zarchiwizowany\\] ", ""));
         }
 
-        project.setState("active"); // Zmiana stanu na aktywny
+        project.setState("active");
         return projectRepository.save(project);
     }
 }

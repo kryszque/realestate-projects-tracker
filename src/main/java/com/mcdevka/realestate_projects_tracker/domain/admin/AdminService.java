@@ -2,6 +2,7 @@ package com.mcdevka.realestate_projects_tracker.domain.admin;
 
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.AssignCompanyRequest;
 import com.mcdevka.realestate_projects_tracker.domain.admin.dto.GrantPermissionsRequest;
+import com.mcdevka.realestate_projects_tracker.domain.admin.dto.UpdateUserRequest;
 import com.mcdevka.realestate_projects_tracker.domain.company.Company;
 import com.mcdevka.realestate_projects_tracker.domain.company.CompanyRepository;
 import com.mcdevka.realestate_projects_tracker.domain.project.Project;
@@ -159,5 +160,20 @@ public class AdminService {
 
             projectAccessRepository.save(access);
         });
+    }
+
+    @Transactional
+    public void updateUserDetails(long userId, UpdateUserRequest request) {
+        User user = userRepository.findById(userId)
+                .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        user.setFirstname(request.firstName());
+        user.setLastname(request.lastName());
+        user.setEmail(request.email());
+        user.setGoogleDriveEmail(request.googleDriveEmail());
+        user.setCanCreateProjects(request.canCreateProjects());
+        user.setCanDeleteProjects(request.canDeleteProjects());
+
+        userRepository.save(user);
     }
 }
