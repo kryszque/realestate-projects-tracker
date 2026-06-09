@@ -19,6 +19,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+import com.google.api.client.http.FileContent;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
+import java.util.Comparator;
+import java.util.Arrays;
 
 import jakarta.annotation.PostConstruct;
 import java.io.IOException;
@@ -238,6 +243,53 @@ public class GoogleDriveService {
             System.out.println("Przeniesiono folder " + fileId + " z " + oldParentId + " do " + newParentId);
         } catch (IOException e) {
             System.err.println("Błąd podczas przenoszenia folderu na Dysku Google: " + e.getMessage());
+        }
+    }
+    // Pobiera folder "Backups" lub go tworzy, jeśli nie istnieje na poziomie rootFolderId
+    public File getOrCreateFolder(String folderName, String parentId) throws IOException {
+        String query = String.format("mimeType='application/vnd.google-apps.folder' and name='%s' and '%s' in parents and trashed=false", folderName, parentId);
+        var fileList = driveService.files().list()
+        .setQ(query)
+        .setFields("files(id, name)")
+        .setSupportsAllDrives(true)
+        .setIncludeItemsFromAllDrives(true)
+        .execute().getFiles();
+        
+        if (!fileList.isEmpty()) {
+            return fileList.get(0);
+        }
+        return createFolder(folderName, parentId);
+    }
+
+    // Wgrywa lokalny plik (.sql.gz) stworzony przez skrypt
+    public File uploadLocalFile(java.io.File file, String parentFolderId) throws IOException {
+        File fileMetadata = new File();
+        fileMetadata.setName(file.getName());
+        fileMetadata.setParents(Collections.singletonList(parentFolderId));
+        
+        FileContent mediaContent = new FileContent("application/gzip", file);
+        return driveService.files().create(fileMetadata, mediaContent)
+                .setFields("id, name")
+                .setSupportsAllDrives(true)
+                .execute();
+    }
+
+    // Listuje pliki w folderze (aby na froncie móc wybrać plik do przywrócenia)
+    public List<File> listFilesInFolder(String folderId) throws IOException {
+        String query = String.format("'%s' in parents and trashed=false", folderId);
+        return driveService.files().list()
+                .setQ(query)
+                .setFields("files(id, name, createdTime)")
+                .setSupportsAllDrives(true)
+                .setIncludeItemsFromAllDrives(true)
+                .execute()
+                .getFiles();
+    }
+
+    // Pobiera plik z Dysku Google na serwer
+    public void downloadFile(String fileId, java.io.File destFile) throws IOException {
+        try (OutputStream out = new FileOutputStream(destFile)) {
+            driveService.files().get(fileId).executeMediaAndDownloadTo(out);
         }
     }
 }

@@ -19,11 +19,14 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.scheduling.annotation.Scheduled;
 
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+import java.util.Arrays;
+import java.util.Comparator;
 
 @Service
 @RequiredArgsConstructor
@@ -175,5 +178,72 @@ public class AdminService {
         user.setCanDeleteProjects(request.canDeleteProjects());
 
         userRepository.save(user);
+    }
+
+    // Automatycznie odpala backup co niedzielę o 2:00 w nocy
+    @Scheduled(cron = "0 0 2 * * SUN") 
+    @Transactional
+    public void createAndUploadBackup() {
+        try {
+            // 1. Uruchomienie skryptu lokalnego
+            ProcessBuilder pb = new ProcessBuilder("/app/scripts/backup.sh");
+            Process process = pb.start();
+            int exitCode = process.waitFor();
+            
+            if (exitCode != 0) {
+                throw new RuntimeException("Skrypt backupu zakończył się błędem!");
+            }
+
+            // 2. Odnalezienie nowostworzonego pliku w katalogu ./backups
+            java.io.File backupDir = new java.io.File("/app/scripts/backups");
+            java.io.File[] files = backupDir.listFiles((d, name) -> name.endsWith(".sql.gz"));
+            if (files == null || files.length == 0) throw new RuntimeException("Nie znaleziono pliku backupu");
+
+            // Sortujemy aby wybrać najnowszy plik
+            java.io.File latestBackup = Arrays.stream(files)
+                    .max(Comparator.comparingLong(java.io.File::lastModified))
+                    .orElseThrow();
+
+            // 3. Wrzucenie na Dysk Google obok folderów firm (w katalog główny aplikacji na Dysku)
+            com.google.api.services.drive.model.File driveFolder = googleDriveService.getOrCreateFolder("Backups", googleDriveService.getRootFolderId());
+            googleDriveService.uploadLocalFile(latestBackup, driveFolder.getId());
+            
+        } catch (Exception e) {
+            System.err.println("Błąd procesu backupu: " + e.getMessage());
+            throw new RuntimeException("Nie udało się utworzyć kopii zapasowej");
+        }
+    }
+
+    @Transactional
+    public void restoreFromBackup(String fileId) {
+        try {
+            java.io.File tempFile = new java.io.File("/app/scripts/backups/temp_restore.sql.gz");
+            
+            // 1. Pobierz wybrany plik backupu z GDrive
+            googleDriveService.downloadFile(fileId, tempFile);
+
+            // 2. Uruchomienie skryptu przywracania z podanym plikiem
+            ProcessBuilder pb = new ProcessBuilder("/app/scripts/restore.sh", tempFile.getAbsolutePath());
+            pb.inheritIO();
+            Process process = pb.start();
+            process.waitFor();
+
+            // 3. Usunięcie pobranego pliku by nie zaśmiecać dysku
+            if(tempFile.exists()) {
+                tempFile.delete();
+            }
+        } catch (Exception e) {
+            System.err.println("Błąd przywracania: " + e.getMessage());
+            throw new RuntimeException("Nie udało się przywrócić bazy danych");
+        }
+    }
+
+    public List<com.google.api.services.drive.model.File> getAvailableBackups() {
+         try {
+             com.google.api.services.drive.model.File driveFolder = googleDriveService.getOrCreateFolder("Backups", googleDriveService.getRootFolderId());
+             return googleDriveService.listFilesInFolder(driveFolder.getId());
+         } catch(Exception e) { 
+             return List.of(); 
+         }
     }
 }

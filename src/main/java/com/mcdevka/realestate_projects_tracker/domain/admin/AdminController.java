@@ -90,4 +90,32 @@ public class AdminController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
     }
+
+    @PostMapping("/backup/create")
+    public ResponseEntity<Void> createBackup() {
+        try {
+            adminService.createAndUploadBackup();
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/backup/restore")
+    public ResponseEntity<Void> restoreBackup(@RequestParam String fileId) {
+        try {
+            adminService.restoreFromBackup(fileId);
+            return ResponseEntity.ok().build();
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/backup/list")
+    public ResponseEntity<List<java.util.Map<String, String>>> listBackups() {
+        var backups = adminService.getAvailableBackups().stream()
+            .map(f -> java.util.Map.of("id", f.getId(), "name", f.getName()))
+            .toList();
+        return ResponseEntity.ok(backups);
+    }
 }
