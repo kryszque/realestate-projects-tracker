@@ -186,7 +186,7 @@ public class AdminService {
     public void createAndUploadBackup() {
         try {
             // 1. Uruchomienie skryptu lokalnego
-            ProcessBuilder pb = new ProcessBuilder("/app/scripts/backup.sh");
+            ProcessBuilder pb = new ProcessBuilder("bash", "/app/scripts/backup.sh");
             Process process = pb.start();
             int exitCode = process.waitFor();
             
@@ -223,7 +223,7 @@ public class AdminService {
             googleDriveService.downloadFile(fileId, tempFile);
 
             // 2. Uruchomienie skryptu przywracania z podanym plikiem
-            ProcessBuilder pb = new ProcessBuilder("/app/scripts/restore.sh", tempFile.getAbsolutePath());
+            ProcessBuilder pb = new ProcessBuilder("bash", "/app/scripts/restore.sh", tempFile.getAbsolutePath());
             pb.inheritIO();
             Process process = pb.start();
             process.waitFor();
